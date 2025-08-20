@@ -3,7 +3,7 @@ import Button from "../components/Button";
 import { ReactComponent as StarIcon } from "../assets/icons/star.svg"; // SVG import
 import { ReactComponent as FavariteIcon } from "../assets/icons/favorite.svg";
 import { ReactComponent as ShareIcon } from "../assets/icons/share.svg";
-
+import { useParams } from 'react-router-dom';
 
 const Container = styled.div`
 max-width: 600px; min-width: 360px; margin: 0 auto; 
@@ -128,6 +128,22 @@ object-fit: cover;
 border-radius: 8px;
 }
 `;
+const MOCK_EVENTS = [
+  {
+    id: "1",
+    title: "칸예 내한 공연",
+    imageUrl: "/assets/cardImage1.png",
+    schedule: "2025.10.01",
+    descripition: "칸예 공연에 오신 것을 환영합니다.",
+    reviews: [
+      {
+        title: "최고의 공연!",
+        contents: "정말 멋졌어요!",
+        photos: ["/assets/review1.png"]
+      }
+    ]
+  },
+];
 
 const ReviewPhoto = ({ photos = [] }) => {
     if (!photos.length) return null; // 사진 없으면 아무것도 렌더 안 함
@@ -142,6 +158,7 @@ const ReviewPhoto = ({ photos = [] }) => {
 };
 
 function InformationPage({ concert }) {
+
     return (
         <Container>
             <ConcertImage $bg={concert.imageUrl}>

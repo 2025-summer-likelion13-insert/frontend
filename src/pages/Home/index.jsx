@@ -1,0 +1,368 @@
+import React from "react";
+import { useState, useEffect, useRef } from "react";
+import { useNavigate } from 'react-router-dom';
+
+import TabNavigation from '../../components/TabNavigation';
+
+import styled, { createGlobalStyle } from "styled-components";
+import colors from '../../styles/colors';
+import homeMainImage from '../../assets/homemain.png';
+import cardImage1 from '../../assets/cardImage1.png';
+import cardImage2 from '../../assets/cardImage2.png';
+import cardImage3 from '../../assets/cardImage3.png';
+import cardImage4 from '../../assets/cardImage4.png';
+import { Icon } from '@iconify/react';
+import Button from '../../components/Button';
+
+
+const GlobalStyle = createGlobalStyle`
+  * { box-sizing: border-box; }
+  html, body, #root { height: 100%; }
+  body {
+    margin: 0;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", "Apple SD Gothic Neo", Arial, sans-serif;
+    background: #ffffff;
+    color: #111;
+  }
+`;
+
+export default function Home() {
+  const navigate = useNavigate();
+  const [hidden, setHidden] = useState(false);
+  const lastY = useRef(0);
+  const [showMyPage, setShowMyPage] = useState(false);  
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => {
+      const y = window.scrollY;
+      const goingDown = y > lastY.current;
+      setHidden(goingDown && y > 80);
+      lastY.current = y;
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  return (
+    <AppWrap>
+      <GlobalStyle />
+
+      <TopBar>
+        <Brand>In<span>Sert</span></Brand>
+        <IconButton aria-label="search">
+          <Icon icon="mingcute:search-line"  
+            style={{
+              color: '#DF3B1E',
+              width: 'clamp(24px, 6.66vw, 40px)',
+              height: 'clamp(24px, 6.66vw, 40px)'
+            }} 
+          />
+        </IconButton>
+      </TopBar>
+
+      <HeroCard>
+        <HeroInner>
+          <HeroImage src={homeMainImage} alt="concert hero" />
+          <HeroShade />
+          <HeroContent>
+            <HeroTitle>콜드플레이<br />내한 공연</HeroTitle>
+            <HeroActions>
+              <Button variant="filled" size="medium">
+                <Icon icon="mdi-light:check" width="24" height="24" style={{ color: '#FFFFFF' }} />
+                선택하기
+              </Button>
+              <WhiteButton variant="filled">
+                <Icon icon="mdi-light:plus" width="24" height="24" style={{ color: '#000' }} />
+                내가 찜한 리스트
+              </WhiteButton>
+            </HeroActions>
+          </HeroContent>
+        </HeroInner>
+      </HeroCard>
+
+      <SectionTitle>이번 달 Top 10 공연</SectionTitle>
+      <CardScrollRow>
+        {MOCK_EVENTS.slice(0, 6).map((ev, index) => (
+          <EventCard
+            key={ev.id}
+            $isFirst={index === 0}
+            // $isLast={index === MOCK_EVENTS.length - 1}
+            onClick={() => navigate(`/information/${ev.id}`)}
+          >
+            <Thumb src={ev.image} alt={ev.title} />
+            <CardShade />
+            <CardMeta>
+              {ev.title.length === 2 && <TitleTop>{ev.title[0]}</TitleTop>}
+              <BottomRow>
+                <TitleBottom>{ev.title[ev.title.length === 2 ? 1 : 0]}</TitleBottom>
+                <IconGroup>
+                  <Icon icon="material-symbols:thumb-up" style={{ color: '#FFFFFF', width: 'clamp(11px, 3.05vw, 18px)', height: 'clamp(11px, 3.05vw, 18px)' }} />
+                  <Icon icon="mdi:information-outline" style={{ color: '#FFFFFF', width: 'clamp(11px, 3.05vw, 18px)', height: 'clamp(11px, 3.05vw, 18px)' }} />
+                </IconGroup>
+              </BottomRow>
+            </CardMeta>
+          </EventCard>
+        ))}
+      </CardScrollRow>
+
+      <SectionTitle>무더위를 날릴 여름 축제</SectionTitle>
+      <CardScrollRow>
+        {MOCK_EVENTS.slice(0, 6).map((ev, index) => (
+          <EventCard
+            key={ev.id}
+            $isFirst={index === 0}
+            // $isLast={index === MOCK_EVENTS.length - 1}
+            onClick={() => navigate(`/information/${ev.id}`)}
+          >
+            <Thumb src={ev.image} alt={ev.title} />
+            <CardShade />
+            <CardMeta>
+              {ev.title.length === 2 && <TitleTop>{ev.title[0]}</TitleTop>}
+              <BottomRow>
+                <TitleBottom>{ev.title[ev.title.length === 2 ? 1 : 0]}</TitleBottom>
+                <IconGroup>
+                  <Icon icon="material-symbols:thumb-up" style={{ color: '#FFFFFF', width: 'clamp(11px, 3.05vw, 18px)', height: 'clamp(11px, 3.05vw, 18px)' }} />
+                  <Icon icon="mdi:information-outline" style={{ color: '#FFFFFF', width: 'clamp(11px, 3.05vw, 18px)', height: 'clamp(11px, 3.05vw, 18px)' }} />
+                </IconGroup>
+              </BottomRow>
+            </CardMeta>
+          </EventCard>
+        ))}
+      </CardScrollRow>      
+
+      {/* ✅ 사람 아이콘 클릭 시 모달 열리도록 props 전달 */}
+      <TabNavigation onPersonClick/>
+  
+      <BottomSafe />
+      <BottomMask/>
+    </AppWrap>
+  );
+}
+/*
+const AppWrap = styled.main`
+  width: 100%;
+  max-width: 600px;
+  min-height: 100vh;
+  margin: 0 auto;
+  position: relative;
+  background: #fff;
+  box-shadow: 0 10px 30px rgba(30, 35, 90, 0.08);
+  border-radius: 26px;
+  overflow-x: visible;
+  overflow-y: hidden;
+
+  @media (max-width: 600px) {
+    border-radius: 0;
+    box-shadow: none;
+  }
+`;
+*/
+const WhiteButton = styled(Button)`
+  background-color: #ffffff !important;
+  color: #000 !important;
+  border: 1px solid #fff;
+  gap: clamp(4px, 1.11vw, 6.66px);
+
+  &:hover {
+    background-color: #fff !important;
+  }
+`;
+
+
+const TopBar = styled.header`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px clamp(16px, 4.44vw, 26.66px) 8px;
+`;
+
+const Brand = styled.h1`
+  margin: 0;
+  font-size: 25px;
+  letter-spacing: 0.4px;
+  color: #df3b1e;
+  font-weight: 800;
+`;
+
+const IconButton = styled.button`
+  border: 0; 
+  background: transparent; 
+  padding: 6px; 
+  cursor: pointer; 
+  border-radius: 10px;
+  &:active { transform: scale(0.97); }
+`;
+
+const HeroCard = styled.section`
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  height: clamp(357px, 99.1vw, 595px);
+  margin: 0 auto;
+  padding: 0 clamp(16px, 4.44vw, 26.66px); /* 360=16px, 600≈26.66px */
+  background: transparent;
+`;
+
+ const HeroInner = styled.div`
+   position: relative;
+   height: 100%;
+   border-radius: 16px;
+   overflow: hidden;
+   background: #fff;
+ `;
+
+const HeroImage = styled.img`
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+`;
+
+const HeroShade = styled.div`
+  position: absolute; inset: 0; background: linear-gradient(180deg, rgba(5,5,10,0.1) 0%, rgba(5,5,10,0.6) 65%, rgba(5,5,10,0.85) 100%);
+`;
+
+const HeroContent = styled.div`
+  position: absolute; left: 30px; right: 30px; bottom: 30px; color: #fff;
+`;
+
+const HeroTitle = styled.h2`
+  margin: 0 0 10px; line-height: 1.22; font-weight: 500; font-size: clamp(24px, 6.66vw, 40px);
+`;
+
+const HeroActions = styled.div`
+  display: flex; gap: 8px;
+`;
+
+const SectionTitle = styled.h3`
+  margin: clamp(15px, 4.166vw, 25px) clamp(16px, 4.44vw, 26.66px) clamp(11px, 3.055vw, 18.33px); 
+  font-size: clamp(12px, 3.33vw, 20px); color: #000; font-weight: 500;
+`;
+
+const TitleTop = styled.div`
+  font-size: clamp(10px, 2.77vw, 16px);
+  font-weight: 500;
+  line-height: 1.2;
+  margin-bottom: 0.5%
+
+`;
+
+const TitleBottom = styled.div`
+  font-size: clamp(10px, 2.77vw, 16px);
+  font-weight: 500;
+  line-height: 1.2;
+  display: flex;
+  align-items: center;
+`;
+
+const CardScrollRow = styled.div`
+  display: flex;
+  overflow-x: auto;
+  gap: clamp(6px, 1.66vw, 10px);
+  margin-left: clamp(16px, 4.44vw, 26.66px); 
+  scroll-snap-type: x mandatory;
+  &::-webkit-scrollbar {
+  display: none;
+  }
+`;
+
+const EventCard = styled.article`
+  position: relative;
+  flex: 0 0 auto;
+  width: clamp(104px, 28vw, 160px);
+  aspect-ratio: 104 / 148;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fff;
+  scroll-snap-align: start;
+ 
+`;
+
+const Thumb = styled.img`
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;  /* 가운데 채우기 */
+`;
+
+const CardShade = styled.div`
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.55) 80%);
+`;
+
+const CardMeta = styled.div`
+  position: absolute;
+  left: clamp(6px, 1.66vw, 10px); 
+  right: clamp(6px, 1.66vw, 10px);
+  bottom: clamp(6px, 1.66vw, 10px);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+`;
+
+const IconGroup = styled.div`
+  display: flex;
+  align-items: center;
+  gap: clamp(6px, 1.66vw, 10px);
+  margin-left: clamp(6px, 1.66vw, 10px);
+`;
+
+const BottomRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: clamp(6px, 1.66vw, 10px);
+`;
+
+const BottomMask = styled.div`
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 600px;
+
+  height: 50px;                 
+  background: #fff;             
+  border-radius: 26px 26px 0 0; 
+  z-index: 9;                  
+  pointer-events: none;         
+`;
+
+const BottomSafe = styled.div`
+  height: 82px; /* 탭바 공간 확보 */
+`;
+
+const Overlay = styled.button`
+  position: fixed;
+  inset: 0;
+  background: transparent; /* 살짝 어둡게 하려면 rgba(0,0,0,0.08) */
+  border: 0;
+  z-index: 998;
+`;
+
+const AppWrap = styled.main`
+  width: 100%;
+  max-width: 600px;
+  min-height: 100vh;
+  margin: 0 auto;
+  position: relative;
+  background: #fff;
+  box-shadow: 0 10px 30px rgba(30, 35, 90, 0.08);
+  border-radius: 26px;
+  overflow-x: visible;
+  overflow-y: hidden;
+
+  @media (max-width: 600px) {
+    border-radius: 0;
+    box-shadow: none;
+  }
+`;
+
+/** Mock Data */
+const MOCK_EVENTS = [
+  { id: 1, title: ["칸예", "내한 공연"], image: cardImage1 },
+  { id: 2, title: ["펜타포트", "페스티벌"], image: cardImage2 },
+  { id: 3, title: ["DEADLINE"], image: cardImage3 },
+  { id: 4, title: ["INTO", "THE WISH"], image: cardImage4 },
+];
