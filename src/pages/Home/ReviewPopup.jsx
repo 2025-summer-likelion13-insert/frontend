@@ -1,11 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
 import { Icon } from '@iconify/react';
 import characterImage from '../../assets/characterImage.png';
 
-export default function ReviewPopup({ onClose, onWrite }) {
-  const popupRef = useRef();
+export default function ReviewPopupComponent({ onClose = () => {} }) {
+  const popupRef = useRef(null);
   const [isClosing, setIsClosing] = useState(false);
+  const navigate = useNavigate();
 
   // 바깥 클릭 시 닫기
   useEffect(() => {
@@ -23,6 +25,14 @@ export default function ReviewPopup({ onClose, onWrite }) {
     setTimeout(() => onClose(), 250); // 애니메이션 끝난 뒤 닫기
   };
 
+  const handleWriteClick = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      onClose();
+      navigate('/review/write');           // ✅ 실제 라우트 경로에 맞춰주세요
+    }, 250);
+  };
+
   return (
     <Overlay>
       <PopupContainer ref={popupRef} className={isClosing ? 'closing' : ''}>
@@ -32,7 +42,7 @@ export default function ReviewPopup({ onClose, onWrite }) {
           지금 평가해 보세요!
         </TextHighlight>
         <ButtonRow>
-          <FilledButton onClick={onWrite}>
+          <FilledButton onClick={handleWriteClick}>
             <Icon icon="mdi:pencil" width="18" /> 리뷰 작성하기
           </FilledButton>
           <OutlinedButton onClick={handleClose}>
