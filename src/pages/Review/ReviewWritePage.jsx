@@ -8,7 +8,8 @@ const fluid = (min, max) =>
   `clamp(${min}px, calc(${min}px + (${max} - ${min}) * ((100vw - 360px) / 240)), ${max}px)`;
 
 export default function ReviewWritePage() {
-  const [rating, setRating] = useState(4);
+  const [rating, setRating] = useState(0);
+  const [toastVisible, setToastVisible] = useState(false);
 
   return (
     <Container>
@@ -17,7 +18,19 @@ export default function ReviewWritePage() {
           <Icon className="close-ic" icon="material-symbols:close" />
           <Title>연경 본점</Title>
         </LeftGroup>
-        <DoneBtn>완료</DoneBtn>
+<DoneBtn
+  onClick={() => {
+    if (rating === 0) {
+      setToastVisible(true);
+      setTimeout(() => setToastVisible(false), 2000); // 2초 뒤 사라짐
+    } else {
+      // 제출 로직
+    }
+  }}
+>
+  완료
+</DoneBtn>
+
       </TopBar>
 
       <Content>
@@ -57,6 +70,8 @@ export default function ReviewWritePage() {
           </PlusBox>
         </ImageUpload>
       </Content>
+
+      {toastVisible && <Toast>별점을 입력해주세요!</Toast>}
     </Container>
   );
 }
@@ -192,5 +207,26 @@ const PlusBox = styled.div`
     width: ${fluid(20, 22)};
     height: ${fluid(20, 22)};
     color: #d9d9d9;
+  }
+`;
+
+const Toast = styled.div`
+  position: fixed;
+  bottom: ${fluid(80, 100)};
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.75);
+  color: white;
+  padding: ${fluid(10, 12)} ${fluid(16, 20)};
+  border-radius: ${fluid(8, 12)};
+  font-size: ${fluid(13, 15)};
+  z-index: 999;
+  animation: fadeInOut 2s ease;
+
+  @keyframes fadeInOut {
+    0% { opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { opacity: 0; }
   }
 `;
