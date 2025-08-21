@@ -1,16 +1,41 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { Icon } from '@iconify/react';
 import { useNavigate } from 'react-router-dom';
 
 export default function SearchPage() {
+  const navigate = useNavigate();
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState([]);
 
-const navigate = useNavigate();
+  // 검색 API 호출
+  const fetchSearchResults = async () => {
+    try {
+      const params = new URLSearchParams({ q: query, limit: '50' });
+      const res = await fetch(`/api/performs/fixed/search?${params}`);
+      const data = await res.json();
+      setResults(data);
+    } catch (error) {
+      console.error('검색 실패:', error);
+      setResults([]);
+    }
+  };
+
+  const handleSearch = () => {
+  if (query.trim()) {
+    navigate(`/search?q=${encodeURIComponent(query.trim())}`);
+  }
+};
+
+  // input 엔터 시 검색
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') fetchSearchResults();
+  };
 
   return (
     <Container>
       <TopBar>
-        <BackIcon   
+        <BackIcon
           icon="fluent:ios-arrow-24-regular"
           onClick={() => navigate(-1)}
           role="button"
@@ -18,11 +43,25 @@ const navigate = useNavigate();
         />
 
         <InputWrap>
-
-        <SearchInput placeholder="검색창" />
-        <InputIcon icon="mingcute:search-line" />
+          <SearchInput
+            placeholder="검색창"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={handleKeyDown}
+          />
+          <InputIcon icon="mingcute:search-line" />
         </InputWrap>
       </TopBar>
+
+      {/* 검색 결과 출력 */}
+      <ResultList>
+        {results.map((item) => (
+          <ResultItem key={item.externalId}>
+            <Poster src={item.posterUrl || '/default.jpg'} alt="포스터" />
+            <Title>{item.title}</Title>
+          </ResultItem>
+        ))}
+      </ResultList>
     </Container>
   );
 }
@@ -57,7 +96,7 @@ const SearchInput = styled.input`
   height: 36px;
   border: none;
   border-radius: 6px;
-  padding: 0 12px 0 36px; /* 왼쪽에 아이콘 공간 확보 */
+  padding: 0 12px 0 36px;
   background: #f1f1f1;
   font-size: 14px;
   color: #000;
@@ -71,4 +110,30 @@ const InputIcon = styled(Icon)`
   transform: translateY(-50%);
   font-size: 18px;
   color: #000;
+`;
+
+// 결과 리스트
+const ResultList = styled.ul`
+  margin-top: 24px;
+  padding: 0;
+  list-style: none;
+`;
+
+const ResultItem = styled.li`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+`;
+
+const Poster = styled.img`
+  width: 60px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 6px;
+`;
+
+const Title = styled.span`
+  font-size: 15px;
+  color: #111;
 `;
