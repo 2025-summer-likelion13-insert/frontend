@@ -1,90 +1,139 @@
-import React from 'react';
-import styled from 'styled-components';
+import React, { useEffect, useRef, useState } from 'react';
+import styled, { keyframes } from 'styled-components';
 import { Icon } from '@iconify/react';
-import colors from '../styles/colors'; // 주 색상 정의된 파일
+import characterImage from '../../assets/characterImage.png';
 
-export default function ReviewPopup({ onClose, onReview }) {
+export default function ReviewPopup({ onClose, onWrite }) {
+  const popupRef = useRef();
+  const [isClosing, setIsClosing] = useState(false);
+
+  // 바깥 클릭 시 닫기
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (popupRef.current && !popupRef.current.contains(e.target)) {
+        handleClose();
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleClose = () => {
+    setIsClosing(true);
+    setTimeout(() => onClose(), 250); // 애니메이션 끝난 뒤 닫기
+  };
+
   return (
-    <PopupWrapper>
-      <PopupCard>
-        <Emoji>😃</Emoji>
-        <TextWrap>
-          <Highlight>InSert</Highlight>가 추천한 장소는 어땠나요?
-          <br />
+    <Overlay>
+      <PopupContainer ref={popupRef} className={isClosing ? 'closing' : ''}>
+        <CharacterImage src={characterImage} alt="character" />
+        <TextHighlight>
+          <span className="highlight">InSert</span>가 추천한 장소는 어땠나요?<br />
           지금 평가해 보세요!
-        </TextWrap>
-
+        </TextHighlight>
         <ButtonRow>
-          <PrimaryButton onClick={onReview}>
-            <Icon icon="material-symbols:edit" width="20" />
-            리뷰 작성하기
-          </PrimaryButton>
-          <SecondaryButton onClick={onClose}>
-            <Icon icon="material-symbols:close" width="20" />
-            닫기
-          </SecondaryButton>
+          <FilledButton onClick={onWrite}>
+            <Icon icon="mdi:pencil" width="18" /> 리뷰 작성하기
+          </FilledButton>
+          <OutlinedButton onClick={handleClose}>
+            <Icon icon="mdi:close-circle-outline" width="18" /> 닫기
+          </OutlinedButton>
         </ButtonRow>
-      </PopupCard>
-    </PopupWrapper>
+      </PopupContainer>
+    </Overlay>
   );
 }
-const PopupWrapper = styled.div`
+const fadeOut = keyframes`
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(0.95); }
+`;
+
+const Overlay = styled.div`
   position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 999;
-  width: 90%;
-  max-width: 400px;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  font-family: 'Pretendard', sans-serif;
 `;
 
-const PopupCard = styled.div`
+const PopupContainer = styled.div`
   background: white;
-  border-radius: 26px;
-  padding: 32px 24px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  border-radius: 24px;
+  padding: 32px 20px;
+  max-width: 320px;
+  width: 90%;
   text-align: center;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  transition: all 0.25s ease;
+
+  &.closing {
+    animation: ${fadeOut} 0.25s forwards;
+  }
+
+  @media (max-width: 360px) {
+    padding: 28px 16px;
+    max-width: 300px;
+  }
 `;
 
-const Emoji = styled.div`
-  font-size: 48px;
-  margin-bottom: 16px;
+const CharacterImage = styled.img`
+  width: 120px;
+  height: auto;
+  margin-bottom: 0px;
+
+  @media (max-width: 546px) {
+    width: 328px;
+  }
 `;
 
-const TextWrap = styled.p`
+const TextHighlight = styled.p`
   font-size: 16px;
-  color: ${colors.black};
   line-height: 1.5;
-`;
+  margin-bottom: 24px;
+  margin-top: 0px;
+  font-weight: 500;
+  .highlight {
+    color: #DF3B1E;
+    font-weight: 700;
+  }
 
-const Highlight = styled.span`
-  color: ${colors.main}; // Insert 주 색상
-  font-weight: bold;
+  @media (max-width: 360px) {
+    font-size: 14px;
+  }
 `;
 
 const ButtonRow = styled.div`
   display: flex;
-  justify-content: center;
   gap: 12px;
-  margin-top: 24px;
+  justify-content: center;
   flex-wrap: wrap;
 `;
 
-const PrimaryButton = styled.button`
-  background: ${colors.main};
+const FilledButton = styled.button`
+  background: #DF3B1E;
   color: white;
+  padding: 12px 20px;
   border: none;
-  border-radius: 100px;
-  padding: 10px 20px;
+  border-radius: 24px;
+  font-size: 14px;
   font-weight: 600;
+  font-family: 'Pretendard', sans-serif;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   cursor: pointer;
+
+  @media (max-width: 360px) {
+    font-size: 13px;
+    padding: 10px 16px;
+  }
 `;
 
-const SecondaryButton = styled(PrimaryButton)`
-  background: transparent;
-  color: ${colors.main};
-  border: 2px solid ${colors.main};
+const OutlinedButton = styled(FilledButton)`
+  background: white;
+  color: #DF3B1E;
+  border: 2px solid #DF3B1E;
 `;

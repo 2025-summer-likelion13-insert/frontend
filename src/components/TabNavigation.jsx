@@ -1,31 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import colors from '../styles/colors';
 import { Icon } from '@iconify/react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate , useLocation} from 'react-router-dom';
 
 export default function TabNavigation({ onPersonClick }) {
+  const location = useLocation();
   const [activeIndex, setActiveIndex] = useState(0);
   const navigate = useNavigate();
 
-  // 사람 아이콘은 route 없이 isModal만 둡니다.
   const tabs = [
     { icon: 'material-symbols:home', route: '/' },
     { icon: 'majesticons:map-marker', route: '/map' },
     { icon: 'material-symbols:person', route: '/mypage' },
   ];
 
-  // 탭 클릭 핸들러
+  useEffect(() => {
+    const foundIndex = tabs.findIndex(tab => tab.route === location.pathname);
+    if (foundIndex !== -1) {
+      setActiveIndex(foundIndex);
+    }
+  }, [location.pathname]);
+
   const handleTabClick = (index) => {
-    setActiveIndex(index);
     const tab = tabs[index];
-      console.log("🖱️ 클릭된 탭:", index, tab);
-    if (tab.isModal) {
-        console.log("🙋 person 아이콘 클릭됨");
-      onPersonClick?.(); // 모달 열기
-    } else if (tab.route) {
-        console.log("📍 라우팅:", tab.route);
-      navigate(tab.route); // 라우팅
+    if (tab.route) {
+    navigate(tab.route);
     }
   };
 
@@ -38,7 +38,7 @@ export default function TabNavigation({ onPersonClick }) {
             <TabItem
               key={index}
               onClick={() => handleTabClick(index)}
-              $active={isActive} // ✅ transient prop
+              $active={isActive}
             >
               <HoverEffectWrapper className="hover-wrapper" $active={isActive}>
                 <WhiteRing>
@@ -69,6 +69,7 @@ const Wrapper = styled.div`
   left: 50%;
   transform: translateX(-50%);
   z-index: 997;
+
 `;
 
 const TabBar = styled.nav`
@@ -90,7 +91,6 @@ const TabItem = styled.button`
   position: relative;
   cursor: pointer;
 
-  /* hover 시 효과 */
   &:hover .hover-wrapper {
     opacity: 1;
     transform: translate(-50%, -25%);
@@ -100,11 +100,11 @@ const TabItem = styled.button`
     opacity: 0;
   }
 
-  /* ✅ active 상태를 transient prop으로 제어 */
   .hover-wrapper {
     opacity: ${({ $active }) => ($active ? 1 : 0)};
     transform: translate(-50%, ${({ $active }) => ($active ? '-25%' : '0')});
   }
+
   .base-icon {
     opacity: ${({ $active }) => ($active ? 0 : 1)};
   }
@@ -116,13 +116,13 @@ const HoverEffectWrapper = styled.div`
   left: 50%;
   transform: translate(-50%, 0);
   transition: all 0.3s ease;
-  opacity: ${({ $active }) => ($active ? 1 : 0)}; /* ✅ transient prop */
+  opacity: ${({ $active }) => ($active ? 1 : 0)};
   z-index: 2;
 `;
 
 const BaseIcon = styled.div`
   transition: opacity 0.2s ease;
-  opacity: ${({ $hidden }) => ($hidden ? 0 : 1)}; /* ✅ transient prop */
+  opacity: ${({ $hidden }) => ($hidden ? 0 : 1)};
 `;
 
 const WhiteRing = styled.div`

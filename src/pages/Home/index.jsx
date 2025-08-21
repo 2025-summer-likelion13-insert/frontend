@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from 'react-router-dom';
 
 import TabNavigation from '../../components/TabNavigation';
+import ReviewPopup from '../../pages/Home/ReviewPopup';
 
 import styled, { createGlobalStyle } from "styled-components";
 import colors from '../../styles/colors';
@@ -13,7 +14,6 @@ import cardImage3 from '../../assets/cardImage3.png';
 import cardImage4 from '../../assets/cardImage4.png';
 import { Icon } from '@iconify/react';
 import Button from '../../components/Button';
-
 
 const GlobalStyle = createGlobalStyle`
   * { box-sizing: border-box; }
@@ -32,6 +32,17 @@ export default function Home() {
   const lastY = useRef(0);
   const [showMyPage, setShowMyPage] = useState(false);  
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [showPopup, setShowPopup] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowPopup(true);
+    }, 5000); // 5초 후 팝업 표시
+
+    
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const onScroll = () => {
@@ -131,8 +142,17 @@ export default function Home() {
         ))}
       </CardScrollRow>      
 
-      {/* ✅ 사람 아이콘 클릭 시 모달 열리도록 props 전달 */}
-      <TabNavigation onPersonClick/>
+      {showPopup && (
+        <ReviewPopup
+          onClose={() => setShowPopup(false)}
+          onWrite={() => {
+            console.log("작성하기 클릭!");
+            setShowPopup(false);
+          }}
+        />
+      )}      
+
+      <TabNavigation/>
   
       <BottomSafe />
       <BottomMask/>
