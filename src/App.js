@@ -5,11 +5,11 @@ import TabNavigation from './components/TabNavigation';
 import Home from './pages/Home';
 import DetailPage from './pages/Home/DetailPage';
 import MyPage from './pages/Home/MyPage';
+import SearchPage from './pages/Home/SearchPage';
 import ReviewWritePage from './pages/Review/ReviewWritePage';
 import MyWishlistPage from './pages/MyPage/MyWishlistPage';
 import InformationPage from './pages/InformationPage';
 
-// 경로를 확인하고 탭 표시 여부를 결정하는 컴포넌트
 function AppInner() {
   const location = useLocation();
   const HIDE_TABS = ['/mywishlist'];
@@ -20,6 +20,7 @@ function AppInner() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/detail/:id" element={<DetailPage />} />
+        <Route path="/search" element={<SearchPage/>}/>
         <Route path="/review/write" element={<ReviewWritePage />} />
         <Route path="/mywishlist" element={<MyWishlistPage />} />
         <Route path="/information" element={<InformationPage />} />

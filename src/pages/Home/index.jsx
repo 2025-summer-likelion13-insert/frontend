@@ -59,18 +59,25 @@ export default function Home() {
     <AppWrap>
       <GlobalStyle />
 
-      <TopBar>
-        <Brand>In<span>Sert</span></Brand>
-        <IconButton aria-label="search">
-          <Icon icon="mingcute:search-line"  
-            style={{
-              color: '#DF3B1E',
-              width: 'clamp(24px, 6.66vw, 40px)',
-              height: 'clamp(24px, 6.66vw, 40px)'
-            }} 
-          />
-        </IconButton>
-      </TopBar>
+    <TopBar>
+      <Brand>
+        In<span>Sert</span>
+      </Brand>
+
+      <IconButton
+        aria-label="search"
+        onClick={() => navigate('/search')} // ✅ 클릭 시 이동
+      >
+        <Icon
+          icon="mingcute:search-line"
+          style={{
+            color: '#DF3B1E',
+            width: 'clamp(24px, 6.66vw, 40px)',
+            height: 'clamp(24px, 6.66vw, 40px)',
+          }}
+        />
+      </IconButton>
+    </TopBar>
 
       <HeroCard>
         <HeroInner>

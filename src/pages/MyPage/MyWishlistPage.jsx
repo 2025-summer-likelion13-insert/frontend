@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import { Icon } from '@iconify/react';
 import cardImage1 from '../../assets/cardImage1.png';
 import colors from '../../styles/colors';
+import { useNavigate } from 'react-router-dom';
 
 const fluid = (min, max) =>
   `clamp(${min}px, calc(${min}px + (${max} - ${min}) * ((100vw - 360px) / 240)), ${max}px)`;
@@ -51,10 +52,19 @@ export default function MyWishlistPage() {
     closeMemo();
   };
 
+  const navigate = useNavigate();
+
   return (
     <Container>
       <Header>
-        <Icon className="back" icon="fluent:ios-arrow-24-regular" />
+        <Icon
+          className="back"
+          icon="fluent:ios-arrow-24-regular"
+          onClick={() => navigate(-1)} 
+          role="button"
+          aria-label="뒤로가기"
+        />
+
         <Title>나의 찜 리스트</Title>
       </Header>
 
