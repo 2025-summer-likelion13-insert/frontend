@@ -34,6 +34,98 @@ export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [showPopup, setShowPopup] = useState(false);
+/*API데이터*/
+  const [top10, setTop10] = useState([]);
+  const [summer, setSummer] = useState([]);
+  const [loading, setLoading] = useState({ top10: false, summer: false });
+  const [error, setError] = useState(null);
+
+  const [likes, setLikes] = useState({});
+/*
+const normalize = (arr = []) =>
+  arr.map((it, i) => ({
+    id: it?.id ?? `tmp-${i}`,
+    externalId: it?.mt20id
+      ? String(it.mt20id)
+      : it?.externalId
+      ? String(it.externalId)
+      : null,   // ← undefined 방지
+    title: it?.prfnm ?? it?.title ?? '',
+    image: it?.poster ?? it?.posterUrl ?? it?.image ?? ''
+  }));
+*/
+const normalize = (arr=[]) => arr.map((it,i)=>({
+  id: it.mt20id ?? it.id ?? `tmp-${i}`,
+  externalId: it.mt20id ?? it.externalId ?? '',   // ← 홈에서도 꼭 설정
+  title: it.prfnm ?? it.title ?? '',
+  image: it.poster ?? it.posterUrl ?? it.image ?? '',
+}));
+/** 안전 fetch(JSON) */
+const getJson = async (url, signal) => {
+  const res = await fetch(url, { method: 'GET', signal });
+  if (!res.ok) throw new Error(`${url} ${res.status}`);
+  return res.json();
+};
+
+  /** TOP10 공연 불러오기 */
+const fetchTop10 = async (signal) => {
+  try {
+    setLoading(p => ({ ...p, top10: true }));
+    const data = await getJson('/api/performs/fixed/top10', signal);
+    setTop10(normalize(data));
+  } catch (e) {
+    setError('TOP10 불러오기 실패');
+    setTop10([]);
+    console.error(e);
+  } finally {
+    setLoading(p => ({ ...p, top10: false }));
+  }
+};
+
+/** 여름 축제 불러오기  */
+const fetchSummer = async (signal) => {
+  try {
+    setLoading(p => ({ ...p, summer: true }));
+    // 1) 전용 엔드포인트 시도
+    try {
+      const data = await getJson('/api/festivals/summer', signal);
+      setSummer(normalize(data));
+    } catch {
+      // 2) 폴백: 다가오는 공연에서 제목에 '축제' 포함만 필터
+      const data2 = await getJson('/api/performs/fixed/upcoming', signal);
+      const onlyFestival = (Array.isArray(data2) ? data2 : []).filter(v =>
+        typeof v?.prfnm === 'string' && /축제/.test(v.prfnm)
+      );
+      setSummer(normalize(onlyFestival));
+    }
+  } catch (e) {
+    setError('여름축제 불러오기 실패');
+    setSummer([]);
+    console.error(e);
+  } finally {
+    setLoading(p => ({ ...p, summer: false }));
+  }
+};
+
+// 2) 찜 토글
+const toggleLike = async (externalId) => {
+  if (!externalId) { alert('이 항목은 외부 ID가 없어 찜하기를 지원하지 않습니다.'); return; }
+  try {
+    const res = await fetch(`/api/likes/perform/${externalId}`, { method: 'PUT' });
+    if (!res.ok) throw new Error(`PUT 실패: ${res.status}`);
+    const data = await res.json();
+    setLikes(prev => ({ ...prev, [externalId]: { liked: data.liked, likeCount: data.likeCount }}));
+  } catch (e) { console.error(e); alert('찜하기 실패'); }
+};
+
+
+/** 최초 1회 조회 */
+useEffect(() => {
+  const ac = new AbortController();
+  fetchTop10(ac.signal);
+  fetchSummer(ac.signal);
+  return () => ac.abort();
+}, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -100,45 +192,63 @@ export default function Home() {
       </HeroCard>
 
       <SectionTitle>이번 달 Top 10 공연</SectionTitle>
-      <CardScrollRow>
-        {MOCK_EVENTS.slice(0, 6).map((ev, index) => (
-          <EventCard
-            key={ev.id}
-            $isFirst={index === 0}
-            // $isLast={index === MOCK_EVENTS.length - 1}
-            onClick={() => navigate(`/information/${ev.id}`)}
-          >
-            <Thumb src={ev.image} alt={ev.title} />
-            <CardShade />
-            <CardMeta>
-              {ev.title.length === 2 && <TitleTop>{ev.title[0]}</TitleTop>}
-              <BottomRow>
-                <TitleBottom>{ev.title[ev.title.length === 2 ? 1 : 0]}</TitleBottom>
-                <IconGroup>
-                  <Icon icon="material-symbols:thumb-up" style={{ color: '#FFFFFF', width: 'clamp(11px, 3.05vw, 18px)', height: 'clamp(11px, 3.05vw, 18px)' }} />
-                  <Icon icon="mdi:information-outline" style={{ color: '#FFFFFF', width: 'clamp(11px, 3.05vw, 18px)', height: 'clamp(11px, 3.05vw, 18px)' }} />
-                </IconGroup>
-              </BottomRow>
-            </CardMeta>
-          </EventCard>
-        ))}
-      </CardScrollRow>
+{/* Top10 */}
+<CardScrollRow>
+  {(top10.length ? top10 : MOCK_EVENTS).slice(0,10).map((ev, index) => {
+    const parts = Array.isArray(ev.title) ? ev.title : String(ev.title||'').split(/\s+/).slice(0,2);
+    const canLike = Boolean(ev.externalId);            // ← map 내부로 이동
+    return (
+      <EventCard
+        key={ev.id || `${index}`}
+        $isFirst={index===0}
+        onClick={() => navigate(`/information/${ev.externalId ?? ev.id}`)}
+      >
+        <Thumb src={ev.image} alt={parts.join('')} />
+        <CardShade />
+        <CardMeta>
+          {parts.length===2 && <TitleTop>{parts[0]}</TitleTop>}
+          <BottomRow>
+            <TitleBottom>{parts[parts.length===2 ? 1 : 0]}</TitleBottom>
+            <IconGroup>
+              <LikeIcon
+                icon={likes[ev.externalId]?.liked ? "material-symbols:thumb-up-rounded" : "material-symbols:thumb-up-outline"}
+                style={{
+                  width:'clamp(11px,3.05vw,18px)', height:'clamp(11px,3.05vw,18px)',
+                  opacity: canLike ? 1 : 0.35, cursor: canLike ? 'pointer':'not-allowed',
+                  pointerEvents: canLike ? 'auto':'none'
+                }}
+                aria-disabled={!canLike}
+                onClick={(e)=>{ e.stopPropagation(); if (canLike) toggleLike(ev.externalId); }}
+              />
+              <Icon icon="mdi:information-outline" style={{ width:'clamp(11px,3.05vw,18px)', height:'clamp(11px,3.05vw,18px)' }} />
+            </IconGroup>
+          </BottomRow>
+        </CardMeta>
+      </EventCard>
+    );
+  })}
+</CardScrollRow>
+
 
       <SectionTitle>무더위를 날릴 여름 축제</SectionTitle>
       <CardScrollRow>
-        {MOCK_EVENTS.slice(0, 6).map((ev, index) => (
+        {(summer.length ? summer : MOCK_EVENTS).slice(0, 10).map((ev, index) => {
+          const parts = Array.isArray(ev.title)
+          ? ev.title
+          : String(ev.title || '').split(/\s+/).slice(0, 2);
+          return (
           <EventCard
-            key={ev.id}
+            key={ev.id || `s-${index}`}
             $isFirst={index === 0}
-            // $isLast={index === MOCK_EVENTS.length - 1}
-            onClick={() => navigate(`/information/${ev.id}`)}
+            /* $isLast={index === MOCK_EVENTS.length - 1}*/
+            onClick={() => navigate(`/information/${ev.id || 0}`)}
           >
-            <Thumb src={ev.image} alt={ev.title} />
+            <Thumb src={ev.image} alt={parts.join('')} />
             <CardShade />
             <CardMeta>
-              {ev.title.length === 2 && <TitleTop>{ev.title[0]}</TitleTop>}
+              {parts.length === 2 && <TitleTop>{parts[0]}</TitleTop>}
               <BottomRow>
-                <TitleBottom>{ev.title[ev.title.length === 2 ? 1 : 0]}</TitleBottom>
+                <TitleBottom>{parts[parts.length === 2 ? 1 : 0]}</TitleBottom>
                 <IconGroup>
                   <Icon icon="material-symbols:thumb-up" style={{ color: '#FFFFFF', width: 'clamp(11px, 3.05vw, 18px)', height: 'clamp(11px, 3.05vw, 18px)' }} />
                   <Icon icon="mdi:information-outline" style={{ color: '#FFFFFF', width: 'clamp(11px, 3.05vw, 18px)', height: 'clamp(11px, 3.05vw, 18px)' }} />
@@ -146,7 +256,8 @@ export default function Home() {
               </BottomRow>
             </CardMeta>
           </EventCard>
-        ))}
+        );
+      })}
       </CardScrollRow>      
 
       {showPopup && (
@@ -386,7 +497,16 @@ const AppWrap = styled.main`
   }
 `;
 
-/** Mock Data */
+const LikeIcon = styled(Icon)`
+  transition: transform 0.2s ease;
+  cursor: pointer;
+
+  &:active {
+    transform: scale(1.3);  /* 클릭 시 살짝 커졌다가 원래대로 */
+  }
+`;
+
+
 const MOCK_EVENTS = [
   { id: 1, title: ["칸예", "내한 공연"], image: cardImage1 },
   { id: 2, title: ["펜타포트", "페스티벌"], image: cardImage2 },

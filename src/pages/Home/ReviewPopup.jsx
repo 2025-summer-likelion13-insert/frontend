@@ -90,11 +90,10 @@ const PopupContainer = styled.div`
 `;
 
 const CharacterImage = styled.img`
-  width: clamp(120px, calc(120px + (547 - 120) * ((100vw - 360px) / 240)), 547px);
+  width: clamp(110px, calc(120px + (183 - 110) * ((100vw - 360px) / 240)), 183px);
   height: auto;
   margin-bottom: 0px;
 `;
-
 
 const TextHighlight = styled.p`
   font-size: 16px;

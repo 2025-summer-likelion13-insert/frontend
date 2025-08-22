@@ -1,36 +1,78 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Icon } from '@iconify/react';
+import { useNavigate } from 'react-router-dom';
 import colors from '../../styles/colors';
 
-// 정확한 360~600 선형 보간 유틸
 const fluid = (min, max) =>
   `clamp(${min}px, calc(${min}px + (${max} - ${min}) * ((100vw - 360px) / 240)), ${max}px)`;
 
+const API_BASE = process.env.REACT_APP_API_BASE;
+
 export default function ReviewWritePage() {
+  const navigate = useNavigate();
   const [rating, setRating] = useState(0);
   const [toastVisible, setToastVisible] = useState(false);
+  const [image, setImage] = useState(null); // 이미지 한 장
+
+  const handleSubmit = async () => {
+    if (rating === 0) {
+      setToastVisible(true);
+      setTimeout(() => setToastVisible(false), 2000);
+      return;
+    }
+   if (!API_BASE) {
+      alert('API_BASE가 설정되지 않았습니다. .env.local을 확인하세요.');
+      return;
+    }
+
+    const reviewData = {
+      userId: 1,
+      placeId: 1,
+      scheduleId: 1,
+      rating,
+      content: "정말 맛있었어요! 경기장 근처에서 식사하기 좋은 곳이에요.",
+      mediaUrls: image ? [image] : [],
+      isVisited: true,
+    };
+
+    try {
+      const res = await fetch(`${API_BASE}/api/reviews`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(reviewData),
+      });
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+      const data = await res.json();
+      if (!data?.id) throw new Error('생성 결과에 id가 없습니다.');
+
+    navigate('/');
+  } catch (err) {
+    console.error(err);
+    alert('리뷰 작성에 실패했습니다.');
+  }
+  };
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const url = URL.createObjectURL(file); // 실제 업로드는 API에서 구현해야 함
+    setImage(url); // 임시로 미리보기용 URL
+  };
 
   return (
     <Container>
       <TopBar>
         <LeftGroup>
-          <Icon className="close-ic" icon="material-symbols:close" />
+          <Icon className="close-ic" icon="material-symbols:close" onClick={() => navigate('/')} />
           <Title>연경 본점</Title>
         </LeftGroup>
-<DoneBtn
-  onClick={() => {
-    if (rating === 0) {
-      setToastVisible(true);
-      setTimeout(() => setToastVisible(false), 2000); // 2초 뒤 사라짐
-    } else {
-      // 제출 로직
-    }
-  }}
->
-  완료
-</DoneBtn>
-
+        <DoneBtn onClick={handleSubmit}>완료</DoneBtn>
       </TopBar>
 
       <Content>
@@ -48,7 +90,6 @@ export default function ReviewWritePage() {
           <span>2025년 8월 16일 방문</span>
         </DateText>
 
-        {/* 불릿 리스트 */}
         <GuideList>
           <GuideItem>
             <Dot icon="tabler:point-filled" />
@@ -65,9 +106,16 @@ export default function ReviewWritePage() {
         </GuideList>
 
         <ImageUpload>
-          <PlusBox>
-            <Icon className="plus-ic" icon="pixel:plus" />
-          </PlusBox>
+          <label htmlFor="imageInput">
+            <PlusBox>
+              {image ? (
+                <Preview src={image} alt="uploaded" />
+              ) : (
+                <Icon className="plus-ic" icon="pixel:plus" />
+              )}
+            </PlusBox>
+          </label>
+          <input id="imageInput" type="file" accept="image/*" onChange={handleImageUpload} hidden />
         </ImageUpload>
       </Content>
 
@@ -76,7 +124,7 @@ export default function ReviewWritePage() {
   );
 }
 
-/* ---------- styles (responsive with fluid()) ---------- */
+/* styles 동일 (아래에 Preview 추가됨) */
 
 const Container = styled.div`
   font-family: 'Pretendard', sans-serif;
@@ -91,10 +139,10 @@ const TopBar = styled.div`
   justify-content: space-between;
   align-items: center;
   margin-bottom: ${fluid(32, 46)};
-
   .close-ic {
     width: ${fluid(20, 24)};
     height: ${fluid(20, 24)};
+    cursor: pointer;
   }
 `;
 
@@ -164,7 +212,6 @@ const DateText = styled.p`
   }
 `;
 
-/* 불릿 리스트 */
 const GuideList = styled.ul`
   list-style: none;
   padding: 0;
@@ -202,12 +249,18 @@ const PlusBox = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-
+  overflow: hidden;
   .plus-ic {
     width: ${fluid(20, 22)};
     height: ${fluid(20, 22)};
     color: #d9d9d9;
   }
+`;
+
+const Preview = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 `;
 
 const Toast = styled.div`

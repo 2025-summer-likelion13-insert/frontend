@@ -1,10 +1,9 @@
 // src/pages/MyPage/MyWishlistPage.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import styled from 'styled-components';
 import { Icon } from '@iconify/react';
 import cardImage1 from '../../assets/cardImage1.png';
-import colors from '../../styles/colors';
 import { useNavigate } from 'react-router-dom';
 
 const fluid = (min, max) =>
@@ -15,30 +14,49 @@ const Portal = ({ children }) =>
   typeof document !== 'undefined' ? createPortal(children, document.body) : null;
 
 export default function MyWishlistPage() {
-  const [list, setList] = useState([
-    {
-      id: 1,
-      title: '칸에 내한 공연',
-      desc:
-        '미국 역사상 GOAT 래퍼 칸예 웨스트가 두 번째로 내한 공연에 오다. ' +
-        '여러분 지역별 특성 행사, 이벤트, 공연에 대한 상세 설명',
-      memo: '',
-    },
-    {
-      id: 2,
-      title: '칸에 내한 공연',
-      desc:
-        '아래의 지역별 특성 행사, 이벤트, 공연에 대한 상세 설명. ' +
-        '설명이 두 줄을 넘어가면 말줄임으로 처리합니다.',
-      memo: '',
-    },
-  ]);
-
-  const removeFromWishlist = (id) => setList((p) => p.filter((it) => it.id !== id));
-
+  const [list, setList] = useState([]);
   const [memoOpen, setMemoOpen] = useState(false);
   const [activeId, setActiveId] = useState(null);
   const [memoText, setMemoText] = useState('');
+  const navigate = useNavigate();
+
+  // --- 서버에서 찜 리스트 불러오기 ---
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch('http://localhost:8080/api/likes/perform/me?page=0&size=20', {
+          headers: { 'x-user-id': 1 },
+        });
+        if (!res.ok) throw new Error('조회 실패');
+        const data = await res.json();
+
+        // 서버 응답: { content: [{externalId, likedAt}], ... }
+        const mapped = data.content.map((it) => ({
+          id: it.externalId,
+          title: `공연 ${it.externalId}`,
+          desc: `찜한 날짜: ${it.likedAt}`,
+          memo: '',
+        }));
+        setList(mapped);
+      } catch (err) {
+        console.error('찜 리스트 불러오기 실패:', err);
+      }
+    })();
+  }, []);
+
+  // --- 하트(빨간색) 클릭 → 서버 삭제 → 화면에서 제거 ---
+  const deleteLike = async (externalId) => {
+    try {
+      const res = await fetch(`http://localhost:8080/api/likes/perform/${externalId}`, {
+        method: 'DELETE',
+        headers: { 'x-user-id': 1 },
+      });
+      if (!res.ok) throw new Error('삭제 실패');
+      setList((prev) => prev.filter((it) => it.id !== externalId));
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const openMemo = (id) => {
     const t = list.find((it) => it.id === id);
@@ -52,8 +70,6 @@ export default function MyWishlistPage() {
     closeMemo();
   };
 
-  const navigate = useNavigate();
-
   return (
     <Container>
       <Header>
@@ -64,7 +80,6 @@ export default function MyWishlistPage() {
           role="button"
           aria-label="뒤로가기"
         />
-
         <Title>나의 찜 리스트</Title>
       </Header>
 
@@ -85,13 +100,13 @@ export default function MyWishlistPage() {
 
               <ThumbWrap>
                 <Thumb src={cardImage1} alt="썸네일" />
-                <Badge>칸예 <br />내한 공연</Badge>
+                <Badge>{item.title}</Badge>
                 <Heart
                   icon="material-symbols:favorite"
                   role="button"
                   aria-label="찜 해제"
                   title="찜 해제"
-                  onClick={() => removeFromWishlist(item.id)}
+                  onClick={() => deleteLike(item.id)}  // ← 삭제 API 연결
                 />
               </ThumbWrap>
             </Row>
@@ -201,33 +216,27 @@ const ModalHeader = styled.div`
   font-size: ${fluid(20, 22)};
   font-weight: 400;
 `;
-
 const Textarea = styled.textarea`
   margin-top: ${fluid(8, 10)};
   padding: ${fluid(12, 14)};
-  padding-left: ${fluid(16, 20)};  // 좌측 정렬 일치
+  padding-left: ${fluid(16, 20)};
   padding-right: ${fluid(16, 20)};
   height: ${fluid(220, 360)};
   resize: none;
   border: 1px solid #fff;
   font-size: ${fluid(11, 13)};
-  font-color: #cbcbcb;
   outline: none;
   background: #fff;
-  ::placeholder {
-    color: #cbcbcb;
-  }
+  ::placeholder { color: #cbcbcb; }
 `;
-
 const ModalFooter = styled.div`
   display: flex;
   justify-content: center; 
   align-items: center;
-  gap: ${fluid(113, 123)};      /* 버튼 간격 줄이기 */
+  gap: ${fluid(113, 123)};
   padding: ${fluid(14, 16)} ${fluid(16, 20)};
   border-top: 1px solid #fff;
 `;
-
 const CancelBtn = styled.button`
   background:none; border:0; color:#8d95a1; font-size:${fluid(14,16)}; cursor:pointer;
 `;

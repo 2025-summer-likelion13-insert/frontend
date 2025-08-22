@@ -1,0 +1,23 @@
+{
+  "/660/posts": "/posts",
+  "/660/posts/:id": "/posts/:id",
+
+  "/660/reviews": "/reviews",
+  "/660/reviews/:id": "/reviews/:id",
+
+  "/660/performs": "/performs",
+  "/660/performs/:id": "/performs/:id",
+
+  "/api/reviews": "/reviews",
+  "/api/reviews/:id": "/reviews/:id",
+  "/api/files/upload": "/files",
+  "/api/files/upload-multiple": "/files",
+
+  "/api/performs/fixed/search": "/performs",
+  "/api/performs/fixed/top10": "/top10",
+  "/api/performs/fixed/upcoming": "/upcoming",
+  "/api/festivals/summer": "/summer",
+
+  "/api/likes/perform": "/likes",
+  "/api/likes/perform/:id": "/likes/:id"
+}

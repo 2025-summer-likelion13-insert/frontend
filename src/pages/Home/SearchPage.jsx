@@ -9,10 +9,11 @@ export default function SearchPage() {
   const [results, setResults] = useState([]);
 
   // 검색 API 호출
+  const API_BASE = process.env.REACT_APP_API_BASE;
   const fetchSearchResults = async () => {
     try {
       const params = new URLSearchParams({ q: query, limit: '50' });
-      const res = await fetch(`/api/performs/fixed/search?${params}`);
+      const res = await fetch(`${API_BASE}/api/performs/fixed/search?${params.toString()}`);
       const data = await res.json();
       setResults(data);
     } catch (error) {
