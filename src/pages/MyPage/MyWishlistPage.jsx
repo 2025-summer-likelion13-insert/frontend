@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import styled from 'styled-components';
 import { Icon } from '@iconify/react';
-import cardImage1 from '../../assets/cardImage1.png';
+import placeholder from '../../assets/cardImage1.png';           // 포스터 없을 때 대체 이미지
 import { useNavigate } from 'react-router-dom';
 
 const fluid = (min, max) =>
@@ -20,44 +20,49 @@ export default function MyWishlistPage() {
   const [memoText, setMemoText] = useState('');
   const navigate = useNavigate();
 
-  // --- 서버에서 찜 리스트 불러오기 ---
+  // ✅ 마이찜: expand=1로 메타(title/poster)까지 받아와서 바로 표시
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch('http://localhost:8080/api/likes/perform/me?page=0&size=20', {
-          headers: { 'x-user-id': 1 },
+        const res = await fetch('/api/likes/perform/me?page=0&size=50&expand=1', {
+          headers: { 'x-user-id': '1' }, // 개발용 유저
         });
         if (!res.ok) throw new Error('조회 실패');
         const data = await res.json();
 
-        // 서버 응답: { content: [{externalId, likedAt}], ... }
+        // 서버 응답: { content: [{ externalId, likedAt, meta?: { title, poster } }], ... }
         const mapped = data.content.map((it) => ({
-          id: it.externalId,
-          title: `공연 ${it.externalId}`,
-          desc: `찜한 날짜: ${it.likedAt}`,
+          id: it.externalId,                         // 뷰모델 id = externalId
+          externalId: it.externalId,
+          title: it.meta?.title ?? `공연 ${it.externalId}`,
+          image: it.meta?.poster ?? placeholder,     // 포스터 없으면 대체 이미지
+          likedAt: it.likedAt,
           memo: '',
         }));
         setList(mapped);
       } catch (err) {
         console.error('찜 리스트 불러오기 실패:', err);
+        setList([]);
       }
     })();
   }, []);
 
-  // --- 하트(빨간색) 클릭 → 서버 삭제 → 화면에서 제거 ---
+  // ✅ 찜 해제: DELETE 후 목록에서 제거
   const deleteLike = async (externalId) => {
     try {
-      const res = await fetch(`http://localhost:8080/api/likes/perform/${externalId}`, {
+      const res = await fetch(`/api/likes/perform/${externalId}`, {
         method: 'DELETE',
-        headers: { 'x-user-id': 1 },
+        headers: { 'x-user-id': '1' },
       });
       if (!res.ok) throw new Error('삭제 실패');
       setList((prev) => prev.filter((it) => it.id !== externalId));
     } catch (e) {
       console.error(e);
+      alert('찜 해제에 실패했습니다.');
     }
   };
 
+  // 메모 UI
   const openMemo = (id) => {
     const t = list.find((it) => it.id === id);
     setActiveId(id);
@@ -76,7 +81,7 @@ export default function MyWishlistPage() {
         <Icon
           className="back"
           icon="fluent:ios-arrow-24-regular"
-          onClick={() => navigate(-1)} 
+          onClick={() => navigate(-1)}
           role="button"
           aria-label="뒤로가기"
         />
@@ -89,24 +94,24 @@ export default function MyWishlistPage() {
         {list.map((item, idx) => (
           <React.Fragment key={item.id}>
             <Row>
-              <Info>
+              <Info onClick={() => navigate(`/information/${item.externalId}`)} role="button">
                 <ItemTitle>{item.title}</ItemTitle>
-                <ItemDesc>{item.desc}</ItemDesc>
-                <MemoBtn type="button" onClick={() => openMemo(item.id)}>
+                <ItemDesc>찜한 날짜: {item.likedAt}</ItemDesc>
+                <MemoBtn type="button" onClick={(e) => { e.stopPropagation(); openMemo(item.id); }}>
                   <Icon className="memo-ic" icon="material-symbols:edit-note" />
                   메모 남기기
                 </MemoBtn>
               </Info>
 
-              <ThumbWrap>
-                <Thumb src={cardImage1} alt="썸네일" />
+              <ThumbWrap onClick={() => navigate(`/information/${item.externalId}`)} role="button">
+                <Thumb src={item.image} alt={item.title} />
                 <Badge>{item.title}</Badge>
                 <Heart
                   icon="material-symbols:favorite"
                   role="button"
                   aria-label="찜 해제"
                   title="찜 해제"
-                  onClick={() => deleteLike(item.id)}  // ← 삭제 API 연결
+                  onClick={(e) => { e.stopPropagation(); deleteLike(item.id); }}  // ✅ DELETE 호출
                 />
               </ThumbWrap>
             </Row>
@@ -148,7 +153,7 @@ const Container = styled.div`
 `;
 const Header = styled.header`
   display: flex; align-items: center; gap: ${fluid(6, 8)};
-  .back { width: ${fluid(20, 24)}; height: ${fluid(20, 24)}; }
+  .back { width: ${fluid(20, 24)}; height: ${fluid(20, 24)}; cursor: pointer; }
 `;
 const Title = styled.h2`margin:0; font-size:${fluid(17,18.5)}; font-weight:400;`;
 const HeaderDivider = styled.hr`
@@ -163,7 +168,7 @@ const Row = styled.article`
   display:grid; grid-template-columns:1fr auto; align-items:start;
   gap:${fluid(12,14)}; padding:${fluid(10,12)} 0;
 `;
-const Info = styled.div`min-width:0;`;
+const Info = styled.div`min-width:0; cursor: pointer;`;
 const ItemTitle = styled.h3`
   margin:0 0 ${fluid(6,8)}; font-size:${fluid(14,16)}; font-weight:400; color:#111;
 `;
@@ -182,7 +187,7 @@ const MemoBtn = styled.button`
 `;
 const ThumbWrap = styled.div`
   position:relative; width:${fluid(104,173)}; height:${fluid(148,247)};
-  border-radius:${fluid(5,8)}; overflow:hidden; flex-shrink:0;
+  border-radius:${fluid(5,8)}; overflow:hidden; flex-shrink:0; cursor: pointer;
 `;
 const Thumb = styled.img`width:100%; height:100%; object-fit:cover; display:block;`;
 const Heart = styled(Icon)`
@@ -231,7 +236,7 @@ const Textarea = styled.textarea`
 `;
 const ModalFooter = styled.div`
   display: flex;
-  justify-content: center; 
+  justify-content: center;
   align-items: center;
   gap: ${fluid(113, 123)};
   padding: ${fluid(14, 16)} ${fluid(16, 20)};

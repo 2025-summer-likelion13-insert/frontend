@@ -163,6 +163,14 @@ app.post('/api/files/upload-multiple', upload.array('files', 10), (req, res) => 
 });
 
 // ──────────────────────────────────────────────────────────────
+app.delete('/api/likes/perform/:externalId', requireUserDev, (req, res) => {
+  const { externalId } = req.params;
+  const idx = likesPerform.findIndex(it => it.userId === req.userId && it.externalId === externalId);
+  if (idx >= 0) likesPerform.splice(idx, 1);
+  res.json({ externalId, liked: false });
+});
+
+
 app.listen(PORT, () => {
   console.log(`Mock API server running on http://localhost:${PORT}`);
 });
