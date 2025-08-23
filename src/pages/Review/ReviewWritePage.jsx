@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import styled from 'styled-components';
 import { Icon } from '@iconify/react';
 import { useNavigate } from 'react-router-dom';
@@ -14,6 +14,9 @@ export default function ReviewWritePage() {
   const [rating, setRating] = useState(0);
   const [toastVisible, setToastVisible] = useState(false);
   const [image, setImage] = useState(null); // 이미지 한 장
+  const [content, setContent] = useState("");
+  const [isWriting, setIsWriting] = useState(false);
+  const textareaRef = useRef(null)
 
   const handleSubmit = async () => {
     if (rating === 0) {
@@ -31,7 +34,7 @@ export default function ReviewWritePage() {
       placeId: 1,
       scheduleId: 1,
       rating,
-      content: "정말 맛있었어요! 경기장 근처에서 식사하기 좋은 곳이에요.",
+      content,
       mediaUrls: image ? [image] : [],
       isVisited: true,
     };
@@ -50,7 +53,7 @@ export default function ReviewWritePage() {
       const data = await res.json();
       if (!data?.id) throw new Error('생성 결과에 id가 없습니다.');
 
-    navigate('/');
+    navigate('/myreview');
   } catch (err) {
     console.error(err);
     alert('리뷰 작성에 실패했습니다.');
@@ -90,20 +93,34 @@ export default function ReviewWritePage() {
           <span>2025년 8월 16일 방문</span>
         </DateText>
 
-        <GuideList>
-          <GuideItem>
-            <Dot icon="tabler:point-filled" />
-            <span>직접 경험한 솔직한 리뷰를 남겨주세요</span>
-          </GuideItem>
-          <GuideItem>
-            <Dot icon="tabler:point-filled" />
-            <span>사진과 함께 글을 작성할 수 있어요. (최대 20자)</span>
-          </GuideItem>
-          <GuideItem>
-            <Dot icon="tabler:point-filled" />
-            <span>단, 사진은 1개만 첨부 가능합니다.</span>
-          </GuideItem>
-        </GuideList>
+<TextAreaWrap onClick={() => textareaRef.current?.focus()}>
+  {/* 가이드 오버레이: 내용이 없고 포커스도 없을 때만 보임 */}
+  <GuideOverlay $hidden={!!content.trim() || isWriting}>
+    <GuideRow>
+      <Dot icon="tabler:point-filled" />
+      <span>직접 경험한 솔직한 리뷰를 남겨주세요</span>
+    </GuideRow>
+    <GuideRow>
+      <Dot icon="tabler:point-filled" />
+      <span>사진과 함께 글을 작성할 수 있어요. (최대 20자)</span>
+    </GuideRow>
+    <GuideRow>
+      <Dot icon="tabler:point-filled" />
+      <span>단, 사진은 1개만 첨부 가능합니다.</span>
+    </GuideRow>
+  </GuideOverlay>
+
+  {/* 실제 입력창은 항상 렌더링 */}
+  <ReviewTextarea
+    ref={textareaRef}
+    value={content}
+    onChange={(e) => setContent(e.target.value.slice(0, 20))} // 20자 제한
+    onFocus={() => setIsWriting(true)}
+    onBlur={() => { if (!content.trim()) setIsWriting(false); }}
+    maxLength={20}
+  />
+  <CharCount>{content.length}/20</CharCount>
+</TextAreaWrap>
 
         <ImageUpload>
           <label htmlFor="imageInput">
@@ -212,23 +229,6 @@ const DateText = styled.p`
   }
 `;
 
-const GuideList = styled.ul`
-  list-style: none;
-  padding: 0;
-  margin: ${fluid(8, 10)} 0 0;
-  display: grid;
-  gap: ${fluid(6, 8)};
-`;
-
-const GuideItem = styled.li`
-  display: flex;
-  align-items: flex-start;
-  gap: ${fluid(8, 10)};
-  color: #cbcbcb;
-  font-size: ${fluid(13, 14)};
-  line-height: 1.4;
-`;
-
 const Dot = styled(Icon)`
   flex: none;
   color: #cbcbcb;
@@ -282,4 +282,49 @@ const Toast = styled.div`
     90% { opacity: 1; }
     100% { opacity: 0; }
   }
+`;
+
+const TextAreaWrap = styled.div`
+  position: relative;
+  margin-top: ${fluid(8, 10)};
+`;
+
+const GuideOverlay = styled.div`
+  position: absolute;
+  inset: ${fluid(12, 14)} ${fluid(16, 20)};
+  color: #cbcbcb;
+  font-size: ${fluid(13, 14)};
+  line-height: 1.45;
+  pointer-events: none;         /* 클릭은 아래 textarea로 전달 */
+  transition: opacity .15s ease;
+  opacity: ${(p) => (p.$hidden ? 0 : 1)};
+`;
+
+const GuideRow = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: ${fluid(8, 10)};
+  margin-bottom: ${fluid(6, 8)};
+`;
+
+const ReviewTextarea = styled.textarea`
+  width: 100%;
+  min-height: ${fluid(90, 110)};
+  padding: ${fluid(12, 14)};
+  padding-left: ${fluid(16, 20)};
+  padding-right: ${fluid(16, 20)};
+  border: 1px solid #eee;
+  border-radius: ${fluid(10, 12)};
+  font-size: ${fluid(14, 16)};
+  line-height: 1.5;
+  resize: none;
+  outline: none;
+  background: #fff;
+`;
+
+const CharCount = styled.div`
+  text-align: right;
+  font-size: ${fluid(12, 13)};
+  color: #bbb;
+  margin-top: ${fluid(6, 8)};
 `;

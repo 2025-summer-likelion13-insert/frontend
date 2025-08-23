@@ -8,6 +8,7 @@ import MyPage from './pages/Home/MyPage';
 import SearchPage from './pages/Home/SearchPage';
 import ReviewWritePage from './pages/Review/ReviewWritePage';
 import MyWishlistPage from './pages/MyPage/MyWishlistPage';
+import MyReviewPage from './pages/MyPage/MyReviewPage';
 import InformationPage from './pages/InformationPage';
 
 function AppInner() {
@@ -23,6 +24,7 @@ function AppInner() {
         <Route path="/search" element={<SearchPage/>}/>
         <Route path="/review/write" element={<ReviewWritePage />} />
         <Route path="/mywishlist" element={<MyWishlistPage />} />
+        <Route path="/myreview" element={<MyReviewPage />} />
         <Route path="/information" element={<InformationPage />} />
         <Route path="/mypage" element={<MyPage />} />
       </Routes>

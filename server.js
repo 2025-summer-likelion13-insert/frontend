@@ -1,6 +1,6 @@
 // server.js
 // ──────────────────────────────────────────────────────────────
-// 개발용 Mock API (Express)
+// 개발용 Mock API (Express) - 단일 파일 전체 코드
 // ──────────────────────────────────────────────────────────────
 const express = require('express');
 const cors = require('cors');
@@ -11,6 +11,7 @@ const fs = require('fs');
 const app = express();
 const PORT = 8080;
 
+// 공통 미들웨어
 app.use(cors());
 app.use(express.json());
 
@@ -19,17 +20,18 @@ const UPLOAD_DIR = path.join(__dirname, 'uploads');
 if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR);
 app.use('/uploads', express.static(UPLOAD_DIR));
 
+// Multer 설정
 const storage = multer.diskStorage({
   destination: (_, __, cb) => cb(null, UPLOAD_DIR),
   filename: (_, file, cb) => {
-    const ext = path.extname(file.originalname || '');
+    const ext = path.extname(file?.originalname || '');
     cb(null, `${Date.now()}_${Math.random().toString(16).slice(2)}${ext}`);
   },
 });
 const upload = multer({ storage });
 
 // ──────────────────────────────────────────────────────────────
-// ① 목 데이터 (메모리)
+// 인메모리 데이터 (실서버 대신 메모리에 저장)
 // ──────────────────────────────────────────────────────────────
 const db = {
   performsTop10: [
@@ -42,7 +44,30 @@ const db = {
   festivalsSummer: [
     { mt20id: 'S1', prfnm: '여름 축제', poster: 'https://picsum.photos/seed/S1/400/600' },
   ],
-  reviews: [],
+  reviews: [
+    // 예시 1건 (없어도 됨)
+    {
+      id: 1,
+      userId: 1,
+      placeId: 1,
+      scheduleId: 1,
+      rating: 5,
+      content: '정말 맛있었어요! 경기장 근처에서 식사하기 좋은 곳이에요.',
+      mediaUrls: ['https://picsum.photos/seed/rev1/800/600'],
+      isVisited: true,
+      createdAt: '2024-12-25T12:00:00',
+      updatedAt: '2024-12-25T12:00:00',
+      placeName: '문학동 맛집',
+      placeCategory: 'DINING',
+      placeAddress: '인천광역시 미추홀구 문학동',
+    },
+  ],
+};
+let nextReviewId = db.reviews.length ? Math.max(...db.reviews.map(r => r.id)) + 1 : 1;
+
+// 장소 레퍼런스 (placeId로 조회용)
+const places = {
+  1: { name: '문학동 맛집', category: 'DINING', address: '인천광역시 미추홀구 문학동' },
 };
 
 // 찜 데이터(유저별)
@@ -53,14 +78,14 @@ const likesPerform = [
 ];
 
 // 간이 인증(개발 편의: 헤더 없으면 1로 대입)
-function requireUserDev(req, res, next) {
+function requireUserDev(req, _res, next) {
   let userId = parseInt(req.header('x-user-id'), 10);
   if (!userId) userId = 1;
   req.userId = userId;
   next();
 }
 
-// 페이지네이션
+// 페이지네이션 유틸
 function paginate(arr, page = 0, size = 20) {
   const start = page * size;
   const end = start + size;
@@ -75,24 +100,27 @@ function paginate(arr, page = 0, size = 20) {
 }
 
 // ──────────────────────────────────────────────────────────────
-// ② 공연/축제 API
+// ① 공연/축제 API
 // ──────────────────────────────────────────────────────────────
-app.get('/api/performs/fixed/top10', (req, res) => res.json(db.performsTop10));
-app.get('/api/performs/fixed/upcoming', (req, res) => res.json(db.performsUpcoming));
+app.get('/api/performs/fixed/top10', (_req, res) => res.json(db.performsTop10));
+app.get('/api/performs/fixed/upcoming', (_req, res) => res.json(db.performsUpcoming));
 app.get('/api/performs/fixed/search', (req, res) => {
   const q = String(req.query.q || '').trim();
   const limit = Number(req.query.limit || 50);
   const all = [...db.performsTop10, ...db.performsUpcoming, ...db.festivalsSummer];
-  const filtered = q ? all.filter(v => String(v.prfnm).toLowerCase().includes(q.toLowerCase())) : all;
+  const filtered = q
+    ? all.filter(v => String(v.prfnm).toLowerCase().includes(q.toLowerCase()))
+    : all;
   res.json(filtered.slice(0, limit));
 });
-app.get('/api/festivals/summer', (req, res) => res.json(db.festivalsSummer));
+app.get('/api/festivals/summer', (_req, res) => res.json(db.festivalsSummer));
 
 // ──────────────────────────────────────────────────────────────
-// ③ 찜(좋아요) API — 일원화
+// ② 찜(좋아요) API — 일원화
 //    목록: GET  /api/likes/perform/me?page=0&size=20
 //    단건: GET  /api/likes/perform/:externalId
 //    토글: POST /api/likes/perform/:externalId   (PUT도 하위호환 지원)
+//    삭제: DELETE /api/likes/perform/:externalId
 // ──────────────────────────────────────────────────────────────
 app.get('/api/likes/perform/me', requireUserDev, (req, res) => {
   const page = parseInt(req.query.page ?? '0', 10);
@@ -127,31 +155,96 @@ function toggleLike(req, res) {
   }
 }
 app.post('/api/likes/perform/:externalId', requireUserDev, toggleLike);
-app.put('/api/likes/perform/:externalId', requireUserDev, toggleLike); // 하위호환
-
-// ──────────────────────────────────────────────────────────────
-// ④ 리뷰 API
-// ──────────────────────────────────────────────────────────────
-app.post('/api/reviews', (req, res) => {
-  const body = req.body || {};
-  const id = db.reviews.length + 1;
-  const review = {
-    id,
-    userId: body.userId ?? 1,
-    placeId: body.placeId ?? 1,
-    scheduleId: body.scheduleId ?? 1,
-    rating: body.rating ?? 0,
-    content: body.content ?? '',
-    mediaUrls: Array.isArray(body.mediaUrls) ? body.mediaUrls : [],
-    createdAt: body.createdAt ?? new Date().toISOString(),
-  };
-  db.reviews.push(review);
-  res.status(201).json(review);
+app.put('/api/likes/perform/:externalId', requireUserDev, toggleLike);
+app.delete('/api/likes/perform/:externalId', requireUserDev, (req, res) => {
+  const { externalId } = req.params;
+  const idx = likesPerform.findIndex(it => it.userId === req.userId && it.externalId === externalId);
+  if (idx >= 0) likesPerform.splice(idx, 1);
+  res.json({ externalId, liked: false });
 });
-app.get('/api/reviews', (req, res) => res.json(db.reviews));
 
 // ──────────────────────────────────────────────────────────────
-// ⑤ 파일 업로드
+// ③ 리뷰 API
+//   - POST   /api/reviews               : 리뷰 생성(ReviewWritePage)
+//   - GET    /api/reviews?userId=1      : 내 리뷰 목록(MyReviewPage)
+//   - GET    /api/reviews/:reviewId     : 단건 조회(사진 양식 스펙)
+// ──────────────────────────────────────────────────────────────
+
+// 리뷰 생성 (ReviewWritePage에서 사용)
+// 요청 body 예시:
+// { userId, placeId, scheduleId, rating, content, mediaUrls:[], isVisited:true }
+app.post('/api/reviews', (req, res) => {
+  try {
+    const {
+      userId,
+      placeId,
+      scheduleId,
+      rating,
+      content,
+      mediaUrls = [],
+      isVisited = true,
+    } = req.body || {};
+
+    if (!userId || !placeId || !scheduleId || !rating) {
+      return res.status(400).json({ success: false, message: '필수 값 누락' });
+    }
+
+    const now = new Date().toISOString().slice(0, 19); // YYYY-MM-DDTHH:mm:ss
+    const placeRef = places[placeId] || { name: '알수없음', category: 'UNKNOWN', address: '' };
+
+    const newReview = {
+      id: nextReviewId++,
+      userId,
+      placeId,
+      scheduleId,
+      rating,
+      content: content ?? '',
+      mediaUrls,         // 클라이언트에서 URL을 넘기면 그대로 저장
+      isVisited,
+      createdAt: now,
+      updatedAt: now,
+      placeName: placeRef.name,
+      placeCategory: placeRef.category,
+      placeAddress: placeRef.address,
+    };
+
+    db.reviews.unshift(newReview);
+
+    // ReviewWritePage 요구사항: 생성 결과에 id가 있어야 함
+    return res.status(201).json({ success: true, id: newReview.id, message: '리뷰가 생성되었습니다.' });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ success: false, message: '서버 오류' });
+  }
+});
+
+// 내 리뷰 목록 (MyReviewPage에서 사용)
+app.get('/api/reviews', (req, res) => {
+  const userId = Number(req.query.userId);
+  const list = Number.isFinite(userId) ? db.reviews.filter(r => r.userId === userId) : db.reviews;
+  return res.json({
+    success: true,
+    data: list,
+    message: '리뷰 목록을 성공적으로 조회했습니다.',
+  });
+});
+
+// 사진 양식 스펙에 맞는 단건 조회 (Notion 스펙)
+app.get('/api/reviews/:reviewId', (req, res) => {
+  const id = Number(req.params.reviewId);
+  const found = db.reviews.find(r => r.id === id);
+  if (!found) {
+    return res.status(404).json({ success: false, message: '리뷰를 찾을 수 없습니다.' });
+  }
+  return res.json({
+    success: true,
+    data: found,
+    message: '리뷰를 성공적으로 조회했습니다.',
+  });
+});
+
+// ──────────────────────────────────────────────────────────────
+// ④ 파일 업로드 (단일/다중) — URL 반환
 // ──────────────────────────────────────────────────────────────
 app.post('/api/files/upload', upload.single('file'), (req, res) => {
   const url = `/uploads/${req.file.filename}`;
@@ -163,14 +256,6 @@ app.post('/api/files/upload-multiple', upload.array('files', 10), (req, res) => 
 });
 
 // ──────────────────────────────────────────────────────────────
-app.delete('/api/likes/perform/:externalId', requireUserDev, (req, res) => {
-  const { externalId } = req.params;
-  const idx = likesPerform.findIndex(it => it.userId === req.userId && it.externalId === externalId);
-  if (idx >= 0) likesPerform.splice(idx, 1);
-  res.json({ externalId, liked: false });
-});
-
-
 app.listen(PORT, () => {
   console.log(`Mock API server running on http://localhost:${PORT}`);
 });
