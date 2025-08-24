@@ -9,6 +9,14 @@ const rawBase =
   process.env.REACT_APP_API_BASE ||
   guessBase;
 
+  // lib/api.js 안 또는 Home.jsx 상단에 함께
+const asArray = (d) => {
+  if (Array.isArray(d)) return d;
+  if (!d || typeof d !== 'object') return [];
+  // 서버가 {data:[…]}, {list:[…]}, {items:[…]}, {content:[…]} 등으로 줄 때 대비
+  return d.data || d.list || d.items || d.content || [];
+};
+
 // 🔒 배포 환경에서 rawBase가 실수로 localhost면 강제로 교체
 export const API_BASE =
   (typeof window !== "undefined" && window.location.hostname !== "localhost" && /localhost|127\.0\.0\.1/.test(rawBase))

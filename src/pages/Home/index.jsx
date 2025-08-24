@@ -44,8 +44,8 @@ export default function Home() {
   const [showPopup, setShowPopup] = useState(false);
 /*API데이터*/
   const [top10, setTop10] = useState([]);
-  const [summer, setSummer] = useState([]);
-  const [loading, setLoading] = useState({ top10: false, summer: false });
+  const [upcoming, setUpcoming] = useState([]);
+  const [loading, setLoading] = useState({ top10: false, upcoming: false });
   const [error, setError] = useState(null);
 
   const [likes, setLikes] = useState({});
@@ -111,51 +111,17 @@ const fetchTop10 = async (signal) => {
     }
   };
 
-/** 여름 축제 불러오기  */
-/*
-const fetchSummer = async (signal) => {
-  try {
-    setLoading(p => ({ ...p, summer: true }));
-    // 1) 전용 엔드포인트 시도
+  const fetchUpcoming = async (signal) => {
     try {
-      const data = await getJson('/api/festivals/summer', signal);
-      setSummer(normalize(data));
-    } catch {
-      // 2) 폴백: 다가오는 공연에서 제목에 '축제' 포함만 필터
-      const data2 = await getJson('/api/performs/fixed/upcoming', signal);
-      const onlyFestival = (Array.isArray(data2) ? data2 : []).filter(v =>
-        typeof v?.prfnm === 'string' && /축제/.test(v.prfnm)
-      );
-      setSummer(normalize(onlyFestival));
-    }
-  } catch (e) {
-    setError('여름축제 불러오기 실패');
-    setSummer([]);
-    console.error(e);
-  } finally {
-    setLoading(p => ({ ...p, summer: false }));
-  }
-};
-*/
-  const fetchSummer = async (signal) => {
-    try {
-      setLoading((p) => ({ ...p, summer: true }));
-      try {
-        const data = await getJson('/api/festivals/summer', signal);
-        setSummer(normalize(Array.isArray(data) ? data : []));
-      } catch {
-        const data2 = await getJson('/api/performs/fixed/upcoming', signal);
-        const onlyFestival = (Array.isArray(data2) ? data2 : []).filter(
-          (v) => typeof v?.prfnm === 'string' && /축제/.test(v.prfnm)
-        );
-        setSummer(normalize(onlyFestival));
-      }
+      setLoading((p) => ({ ...p, upcoming: true }));
+        const data = await getJson('/api/performs/fixed/upcoming', signal);
+        setUpcoming(normalize(Array.isArray(data) ? data : []));
     } catch (e) {
       setError('여름축제 불러오기 실패');
-      setSummer([]);
+      setUpcoming([]);
       console.error(e);
     } finally {
-      setLoading((p) => ({ ...p, summer: false }));
+      setLoading((p) => ({ ...p, upcoming: false }));
     }
   };
 
@@ -192,7 +158,7 @@ const toggleLike = async (externalId) => {
 useEffect(() => {
   const ac = new AbortController();
   fetchTop10(ac.signal);
-  fetchSummer(ac.signal);
+  fetchUpcoming(ac.signal);
   return () => ac.abort();
 }, []);
 
@@ -299,7 +265,7 @@ useEffect(() => {
 
       <SectionTitle>무더위를 날릴 여름 축제</SectionTitle>
       <CardScrollRow>
-        {(summer.length ? summer : MOCK_EVENTS).slice(0, 10).map((ev, index) => {
+        {(upcoming.length ? upcoming : MOCK_EVENTS).slice(0, 10).map((ev, index) => {
           const parts = Array.isArray(ev.title)
           ? ev.title
           : String(ev.title || '').split(/\s+/).slice(0, 2);
