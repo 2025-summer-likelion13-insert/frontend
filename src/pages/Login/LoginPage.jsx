@@ -55,52 +55,24 @@ border: 1px solid #D9D9D9;
 background: #FFF;`
 
 function LoginPage() {
-    const navigate = useNavigate();
+//     const navigate = useNavigate();
 
-    const handleMockLogin = async () => {
-        // 가짜 JWT와 유저 데이터 (sub = userId)
-        const jwt = "mock-jwt-token";
-        const userName = "TestUser";
-        const userEmail = "testuser@example.com";
-        const userId = "108672889987053400743"; // Google sub를 mock
+//     const handleMockLogin = async () => {
+//         // 가짜 JWT와 유저 데이터 (sub = userId)
+//         const jwt = "mock-jwt-token";
+//         const userName = "TestUser";
+//         const userEmail = "testuser@example.com";
+//         const userId = "108672889987053400743"; // Google sub를 mock
 
-        // localStorage에 저장
-        localStorage.setItem("muglog_token", jwt);
-        localStorage.setItem("user_name", userName);
-        localStorage.setItem("user_email", userEmail);
-        localStorage.setItem("user_id", userId); // userId 저장
+//         // localStorage에 저장
+//         localStorage.setItem("muglog_token", jwt);
+//         localStorage.setItem("user_name", userName);
+//         localStorage.setItem("user_email", userEmail);
+//         localStorage.setItem("user_id", userId); // userId 저장
 
-        // 로그인 성공 페이지로 이동
-        navigate(`/NameSettingPage`);
-    };
-    return (
-        <Container>
-            <InsertTitleWrapper>
-                <Character></Character>
-                <InsertTitle>InSert</InsertTitle>
-                <InsertSub>하루의 특별한 순간<br></br>InSert가 함께 할게요.</InsertSub>
-            </InsertTitleWrapper>
-            <ButtonWrapper>
-                <LoginButton onClick={handleMockLogin}>
-                    <GoogleIcon />Google 계정으로 시작하기</LoginButton>
-            </ButtonWrapper>
-        </Container>
-    )
-}
-
-// const navigate = useNavigate();
-
-//     useEffect(() => {
-//         // 로그인 상태 확인
-//         fetch("/api/auth/me", {
-//             method: "GET",
-//             credentials: "include",
-//         })
-//             .then(res => {
-//                 if (res.status === 200) navigate("/NameSettingPage"); // 이미 로그인 됐으면 바로 이동
-//             })
-//             .catch(() => console.log("로그인 필요"));
-//     }, [navigate]);
+//         // 로그인 성공 페이지로 이동
+//         navigate(`/NameSettingPage`);
+//     };
 //     return (
 //         <Container>
 //             <InsertTitleWrapper>
@@ -109,13 +81,40 @@ function LoginPage() {
 //                 <InsertSub>하루의 특별한 순간<br></br>InSert가 함께 할게요.</InsertSub>
 //             </InsertTitleWrapper>
 //             <ButtonWrapper>
-//                 <LoginButton as="a"
-//                     href="https://insert-back.duckdns.org/oauth2/authorization/google">
+//                 <LoginButton onClick={handleMockLogin}>
 //                     <GoogleIcon />Google 계정으로 시작하기</LoginButton>
 //             </ButtonWrapper>
 //         </Container>
 //     )
 // }
 
+const navigate = useNavigate();
+
+    useEffect(() => {
+        // 로그인 상태 확인
+        fetch("/api/auth/me", {
+            method: "GET",
+            credentials: "include",
+        })
+            .then(res => {
+                if (res.status === 200) navigate("/NameSettingPage"); // 이미 로그인 됐으면 바로 이동
+            })
+            .catch(() => console.log("로그인 필요"));
+    }, [navigate]);
+    return (
+        <Container>
+            <InsertTitleWrapper>
+                <Character></Character>
+                <InsertTitle>InSert</InsertTitle>
+                <InsertSub>하루의 특별한 순간<br></br>InSert가 함께 할게요.</InsertSub>
+            </InsertTitleWrapper>
+            <ButtonWrapper>
+                <LoginButton as="a"
+                    href="https://insert-back.duckdns.org/oauth2/authorization/google">
+                    <GoogleIcon />Google 계정으로 시작하기</LoginButton>
+            </ButtonWrapper>
+        </Container>
+    )
+}
 
 export default LoginPage;
