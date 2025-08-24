@@ -39,7 +39,7 @@ function App() {
         <Route path="/mypage" element={<MyPage />} />
         <Route path="/" element={<LoginPage  />} />
         <Route path="/Recommendpage" element={<RecommendPage  />} />
-        <Route path="/InsertPlacePage" element={<InsertPlacePage  />} />
+        <Route path="/InsertPlacePage/:externalId" element={<InsertPlacePage  />} />
         <Route path="/NameSettingPage" element={<NameSettingPage  />} />
         <Route path="/WelcomePage" element={<WelcomePage  />} />
         <Route path="/ProfileSettingPage" element={<ProfileSettingPage  />} />
