@@ -56,6 +56,18 @@ background: #FFF;`
 
 function LoginPage() {
     const navigate = useNavigate();
+
+    useEffect(() => {
+        // 로그인 상태 확인
+        fetch("/api/auth/me", {
+            method: "GET",
+            credentials: "include",
+        })
+            .then(res => {
+                if (res.status === 200) navigate("/NameSettingPage"); // 이미 로그인 됐으면 바로 이동
+            })
+            .catch(() => console.log("로그인 필요"));
+    }, [navigate]);
     return (
         <Container>
             <InsertTitleWrapper>
@@ -63,8 +75,9 @@ function LoginPage() {
                 <InsertTitle>InSert</InsertTitle>
                 <InsertSub>하루의 특별한 순간<br></br>InSert가 함께 할게요.</InsertSub>
             </InsertTitleWrapper>
-            <ButtonWrapper onClick={()=>navigate("/NameSettingPage")}>
-                <LoginButton>
+            <ButtonWrapper>
+                <LoginButton as="a"
+                    href="https://insert-back.duckdns.org/oauth2/authorization/google">
                     <GoogleIcon />Google 계정으로 시작하기</LoginButton>
             </ButtonWrapper>
         </Container>

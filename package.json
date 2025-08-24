@@ -21,6 +21,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
+  "proxy": "https://insert-back.duckdns.org",
   "eslintConfig": {
     "extends": [
       "react-app",
