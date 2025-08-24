@@ -12,7 +12,7 @@ import { ReactComponent as Subway } from "../assets/icons/subway.svg";
 import { ReactComponent as Walk } from "../assets/icons/walk.svg";
 import { useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
-
+import { useParams } from "react-router-dom";
 
 import MenuItem from "../components/MenuToggle";
 import { useState } from "react";
@@ -148,6 +148,8 @@ gap: 13px;        // 아이템 사이 간격 고정
 function InsertPlacePage() {
     const navigate = useNavigate();
     const location = useLocation();
+    const { externalId } = useParams();
+    
     const concertData = location.state?.concertData;
 
 
