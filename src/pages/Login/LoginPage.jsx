@@ -92,7 +92,7 @@ const navigate = useNavigate();
 
     useEffect(() => {
         // 로그인 상태 확인
-        fetch("/api/auth/me", {
+        fetch(`${process.env.REACT_APP_API_URL}/api/auth/me`, {
             method: "GET",
             credentials: "include",
         })
