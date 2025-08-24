@@ -9,6 +9,7 @@ export default function SearchPage() {
   const [results, setResults] = useState([]);
 
   // 검색 API 호출
+  /*
   const API_BASE = process.env.REACT_APP_API_BASE;
   const fetchSearchResults = async () => {
     try {
@@ -21,17 +22,31 @@ export default function SearchPage() {
       setResults([]);
     }
   };
-
+*/
+  const fetchSearchResults = async (q) => {
+     try {
+      if (!q || !q.trim()) { setResults([]); return; }
+      const qs = new URLSearchParams({ q: q.trim(), limit: '50' }).toString();
+      const data = await api(`/api/performs/fixed/search?${qs}`);
+      setResults(Array.isArray(data) ? data : []);
+     } catch (error) {
+       console.error('검색 실패:', error);
+       setResults([]);
+     }
+   };
+/*
   const handleSearch = () => {
   if (query.trim()) {
     navigate(`/search?q=${encodeURIComponent(query.trim())}`);
   }
 };
+*/
 
-  // input 엔터 시 검색
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter') fetchSearchResults();
-  };
+   const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      if (query.trim()) navigate(`/search?q=${encodeURIComponent(query.trim())}`);
+    }
+   };
 
   return (
     <Container>
@@ -58,7 +73,11 @@ export default function SearchPage() {
       <ResultList>
         {results.map((item) => (
           <ResultItem key={item.externalId}>
-            <Poster src={item.posterUrl || '/default.jpg'} alt="포스터" />
+             <Poster>
+                src={imgUrl(item.posterUrl)}
+                alt={item.title}
+                onError={(e)=>{ e.currentTarget.src = '/default.jpg'; }}
+            </Poster>
             <Title>{item.title}</Title>
           </ResultItem>
         ))}
