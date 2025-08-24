@@ -23,11 +23,11 @@ export default function InformationPage() {
       return;
     }
 
-
     const load = async () => {
       try {
         setLoading(true);
         const data = await api(`/api/performs/by-external/${externalId}`);
+        console.log("API response:", response); // 여기서 data 상태 확인
         setData(data);
       } catch (e) {
         console.error(e);
@@ -39,6 +39,10 @@ export default function InformationPage() {
 
     load();
   }, [externalId]);
+
+  useEffect(() => {
+    console.log("Current data state:", data);
+  }, [data]);
 
   if (loading) return <Center>불러오는 중…</Center>;
   if (err) return <Center>{err}</Center>;
@@ -53,13 +57,10 @@ export default function InformationPage() {
     <Container>
       <ConcertImage $bg={data.posterUrl} />
       <ConcertInformation>
-        {/* <ConcertTitle>{data.title}</ConcertTitle> */}
-                <ConcertTitle>{data.externalId}</ConcertTitle>
-
+        <ConcertTitle>{data.title}</ConcertTitle>
         <ConcertSchedule>{dateRange}</ConcertSchedule>
         <ConcertVenue>{data.venueName}</ConcertVenue>
         <ConcertContents>{data.synopsis}</ConcertContents>
-
         <Button
           variant="filled"
           size="small"
