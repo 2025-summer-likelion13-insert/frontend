@@ -53,7 +53,9 @@ export default function InformationPage() {
     <Container>
       <ConcertImage $bg={data.posterUrl} />
       <ConcertInformation>
-        <ConcertTitle>{data.title}</ConcertTitle>
+        {/* <ConcertTitle>{data.title}</ConcertTitle> */}
+                <ConcertTitle>{data.externalId}</ConcertTitle>
+
         <ConcertSchedule>{dateRange}</ConcertSchedule>
         <ConcertVenue>{data.venueName}</ConcertVenue>
         <ConcertContents>{data.synopsis}</ConcertContents>
