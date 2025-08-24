@@ -63,7 +63,7 @@ export default function InformationPage() {
           variant="filled"
           size="small"
           style={{ width: "70px" }}
-          onClick={() => navigate("/insertplace")}
+          onClick={() => navigate(`/insertplace/${data.externalId}`, { state: { concertData: data } })}
         >
           Go
         </Button>
