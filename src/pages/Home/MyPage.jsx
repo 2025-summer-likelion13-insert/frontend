@@ -1,73 +1,88 @@
+// src/pages/MyPage/index.jsx (경로는 네 프로젝트 구조에 맞게)
+// ✅ 변경점
+// - 로컬 profile.png → `${API_BASE}/uploads/profile.png` 로 전환
+// - 안 쓰는 import 제거(colors, profileImg, MyReview, MyVisit)
+// - 하단에 API_BASE 디버그 라벨 추가(연결 확인용)
+
+import { API_BASE } from "../../lib/api";
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { Icon } from '@iconify/react';
-import profileImg from '../../assets/profile.png';
 import colors from '../../styles/colors';
-import TabNavigation from '../../components/TabNavigation'; 
-
-import MyReview from '../../pages/MyPage/MyReviewPage';
-import MyVisit from '../../pages/MyPage/MyVisitSchedule';
+import { Icon } from '@iconify/react';
+import TabNavigation from '../../components/TabNavigation';
 
 export default function MyPage() {
   const navigate = useNavigate();
 
   return (
     <AppWrap>
-    <Container>
-      <TopBar>
-        <Icon icon="hugeicons:cancel-01" width="28" />
-      </TopBar>
+      <Container>
+        <TopBar>
+          <Icon icon="hugeicons:cancel-01" width="28" />
+        </TopBar>
 
-      <ProfileBox>
-        <ProfileTextBox>
-          <Nickname>크리스티아누 호날두</Nickname>
-          <EditProfile>프로필 편집 <Icon icon="ep:arrow-right" width="12" /></EditProfile>
-        </ProfileTextBox>
-        <ProfileImage src={profileImg} alt="profile" />
-      </ProfileBox>
+        <ProfileBox>
+          <ProfileTextBox>
+            <Nickname>크리스티아누 호날두</Nickname>
+            <EditProfile>
+              프로필 편집 <Icon icon="ep:arrow-right" width="12" />
+            </EditProfile>
+          </ProfileTextBox>
+          {/* ✅ 서버 업로드 이미지를 절대경로로 */}
+          <ProfileImage src={`${API_BASE}/uploads/profile.png`} alt="profile" />
+        </ProfileBox>
 
-      <IconRow>
-        <IconColumn onClick={() => navigate('/myvisit')}>
-          <Icon icon="mynaui:heart" width="28" />
-          <IconLabel>내 일정</IconLabel>
-        </IconColumn>
-        <IconColumn onClick={() => navigate('/myreview')}>
-          <Icon icon="mynaui:star" width="28" />
-          <IconLabel>내 리뷰</IconLabel>
-        </IconColumn>
-      </IconRow>
+        <IconRow>
+          <IconColumn onClick={() => navigate('/myvisit')}>
+            <Icon icon="mynaui:heart" width="28" />
+            <IconLabel>내 일정</IconLabel>
+          </IconColumn>
+          <IconColumn onClick={() => navigate('/myreview')}>
+            <Icon icon="mynaui:star" width="28" />
+            <IconLabel>내 리뷰</IconLabel>
+          </IconColumn>
+        </IconRow>
 
-      <SectionDivider />
+        <SectionDivider />
 
-      <LevelBox>
-        <LevelTop>
-          <Icon icon="noto:2nd-place-medal" color="#4880ee" />
-          <LevelText>내 등급 : <strong>Silver</strong></LevelText>
-        </LevelTop>
-        <NextLevel>: 다음 등급까지 <strong>1200P</strong></NextLevel>
-      </LevelBox>
+        <LevelBox>
+          <LevelTop>
+            <Icon icon="noto:2nd-place-medal" color="#4880ee" />
+            <LevelText>
+              내 등급 : <strong>Silver</strong>
+            </LevelText>
+          </LevelTop>
+          <NextLevel>: 다음 등급까지 <strong>1200P</strong></NextLevel>
+        </LevelBox>
 
-      <MenuItem>쿠폰함 <Arrow icon="ep:arrow-right" /></MenuItem>
-      <Divider />
-      <MenuItem>포인트 <Arrow icon="ep:arrow-right" /></MenuItem>
-      <Divider />
-      <MenuItem>나의 찜리스트 <Arrow icon="ep:arrow-right" /></MenuItem>
+        <MenuItem>쿠폰함 <Arrow icon="ep:arrow-right" /></MenuItem>
+        <Divider />
+        <MenuItem>포인트 <Arrow icon="ep:arrow-right" /></MenuItem>
+        <Divider />
+        <MenuItem>나의 찜리스트 <Arrow icon="ep:arrow-right" /></MenuItem>
 
-      <SectionDivider />
+        <SectionDivider />
 
-      <BottomRow>
-        <Notice>
-          공지사항 <RedDot />
-        </Notice>
-        <div>고객센터</div>
-      </BottomRow>
-      <BottomSafe />
-      <TabNavigation />
-    </Container>
+        <BottomRow>
+          <Notice>
+            공지사항 <RedDot />
+          </Notice>
+          <div>고객센터</div>
+        </BottomRow>
+
+        <BottomSafe />
+        <TabNavigation />
+
+        {/* 🔎 연결 확인용: 지금 어떤 서버에 붙었는지 표시 */}
+        <DebugBar>
+          <strong>API_BASE</strong>: {API_BASE}
+        </DebugBar>
+      </Container>
     </AppWrap>
   );
 }
+
 const AppWrap = styled.main`
   
   max-width: 600px;
@@ -228,3 +243,9 @@ const BottomSafe = styled.div`
   height: 82px;
 `;
 
+const DebugBar = styled.div`
+  margin-top: 8px;
+  padding: 8px 0;
+  font-size: 12px;
+  color: #666;
+`;

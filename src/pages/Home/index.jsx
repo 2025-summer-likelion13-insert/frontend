@@ -1,3 +1,4 @@
+import { api, API_BASE } from "../../lib/api";
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from 'react-router-dom';
 
@@ -24,6 +25,14 @@ const GlobalStyle = createGlobalStyle`
     color: #111;
   }
 `;
+
+const imgUrl = (src) => {
+  if (!src) return "";
+  if (/^https?:\/\//i.test(src)) return src;
+  // 앞에 슬래시가 없어도 안전하게 붙여줌
+  const path = src.startsWith("/") ? src : `/${src}`;
+  return `${API_BASE}${path}`;
+};
 
 export default function Home() {
   const navigate = useNavigate();
@@ -60,13 +69,20 @@ const normalize = (arr=[]) => arr.map((it,i)=>({
   image: it.poster ?? it.posterUrl ?? it.image ?? '',
 }));
 /** 안전 fetch(JSON) */
+/*
 const getJson = async (url, signal) => {
   const res = await fetch(url, { method: 'GET', signal });
   if (!res.ok) throw new Error(`${url} ${res.status}`);
   return res.json();
 };
+*/
+  const getJson = async (path, signal) => {
+    // api는 내부에서 `${API_BASE}${path}`를 처리합니다.
+    return await api(path, { signal });
+  };
 
   /** TOP10 공연 불러오기 */
+  /*
 const fetchTop10 = async (signal) => {
   try {
     setLoading(p => ({ ...p, top10: true }));
@@ -80,8 +96,23 @@ const fetchTop10 = async (signal) => {
     setLoading(p => ({ ...p, top10: false }));
   }
 };
+*/
+  const fetchTop10 = async (signal) => {
+    try {
+      setLoading((p) => ({ ...p, top10: true }));
+      const data = await getJson('/api/performs/fixed/top10', signal);
+      setTop10(normalize(Array.isArray(data) ? data : []));
+    } catch (e) {
+      setError('TOP10 불러오기 실패');
+      setTop10([]);
+      console.error(e);
+    } finally {
+      setLoading((p) => ({ ...p, top10: false }));
+    }
+  };
 
 /** 여름 축제 불러오기  */
+/*
 const fetchSummer = async (signal) => {
   try {
     setLoading(p => ({ ...p, summer: true }));
@@ -105,8 +136,31 @@ const fetchSummer = async (signal) => {
     setLoading(p => ({ ...p, summer: false }));
   }
 };
+*/
+  const fetchSummer = async (signal) => {
+    try {
+      setLoading((p) => ({ ...p, summer: true }));
+      try {
+        const data = await getJson('/api/festivals/summer', signal);
+        setSummer(normalize(Array.isArray(data) ? data : []));
+      } catch {
+        const data2 = await getJson('/api/performs/fixed/upcoming', signal);
+        const onlyFestival = (Array.isArray(data2) ? data2 : []).filter(
+          (v) => typeof v?.prfnm === 'string' && /축제/.test(v.prfnm)
+        );
+        setSummer(normalize(onlyFestival));
+      }
+    } catch (e) {
+      setError('여름축제 불러오기 실패');
+      setSummer([]);
+      console.error(e);
+    } finally {
+      setLoading((p) => ({ ...p, summer: false }));
+    }
+  };
 
 // 2) 찜 토글
+/*
 const toggleLike = async (externalId) => {
   if (!externalId) { alert('이 항목은 외부 ID가 없어 찜하기를 지원하지 않습니다.'); return; }
   try {
@@ -116,7 +170,23 @@ const toggleLike = async (externalId) => {
     setLikes(prev => ({ ...prev, [externalId]: { liked: data.liked, likeCount: data.likeCount }}));
   } catch (e) { console.error(e); alert('찜하기 실패'); }
 };
-
+*/
+  const toggleLike = async (externalId) => {
+    if (!externalId) {
+      alert('이 항목은 외부 ID가 없어 찜하기를 지원하지 않습니다.');
+      return;
+    }
+    try {
+      const data = await api(`/api/likes/perform/${externalId}`, { method: 'PUT' });
+      setLikes((prev) => ({
+        ...prev,
+        [externalId]: { liked: data.liked, likeCount: data.likeCount },
+      }));
+    } catch (e) {
+      console.error(e);
+      alert('찜하기 실패');
+    }
+  };
 
 /** 최초 1회 조회 */
 useEffect(() => {
@@ -130,8 +200,6 @@ useEffect(() => {
     const timer = setTimeout(() => {
       setShowPopup(true);
     }, 5000); // 5초 후 팝업 표시
-
-    
     return () => clearTimeout(timer);
   }, []);
 
@@ -504,6 +572,7 @@ const LikeIcon = styled(Icon)`
     transform: scale(1.3);  /* 클릭 시 살짝 커졌다가 원래대로 */
   }
 `;
+
 
 
 const MOCK_EVENTS = [
