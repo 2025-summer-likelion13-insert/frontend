@@ -14,6 +14,20 @@ import TabNavigation from '../../components/TabNavigation';
 
 export default function MyPage() {
   const navigate = useNavigate();
+  const [name, setName] = useState("");
+
+  useEffect(() => {
+    fetch("https://insert-back.duckdns.org/api/auth/me", {
+      method: "GET",
+      credentials: "include", // 쿠키 인증 포함
+    })
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        return res.json();
+      })
+      .then(data => setName(data.name)) // 서버에서 받은 name을 state에 저장
+      .catch(err => console.error("API 호출 실패:", err));
+  }, []);
 
   return (
     <AppWrap>
@@ -24,10 +38,7 @@ export default function MyPage() {
 
         <ProfileBox>
           <ProfileTextBox>
-            <Nickname>크리스티아누 호날두</Nickname>
-            <EditProfile>
-              프로필 편집 <Icon icon="ep:arrow-right" width="12" />
-            </EditProfile>
+            <Nickname>{name}</Nickname>
           </ProfileTextBox>
           {/* ✅ 서버 업로드 이미지를 절대경로로 */}
           <ProfileImage src={`${API_BASE}/uploads/profile.png`} alt="profile" />
@@ -73,11 +84,6 @@ export default function MyPage() {
 
         <BottomSafe />
         <TabNavigation />
-
-        {/* 🔎 연결 확인용: 지금 어떤 서버에 붙었는지 표시 */}
-        <DebugBar>
-          <strong>API_BASE</strong>: {API_BASE}
-        </DebugBar>
       </Container>
     </AppWrap>
   );

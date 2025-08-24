@@ -227,43 +227,52 @@ function RecommendPage() {
     const [selectMode, setSelectMode] = useState(false); // 버튼 눌렀는지 여부
     const [selectedPlaces, setSelectedPlaces] = useState([]); // 선택된 장소 id 배열
     const [activePlace, setActivePlace] = useState(null); // 정보창에 띄울 장소
+    const [name, setName] = useState("");
+    const [userId, setUserId] = useState(null);
+
+    useEffect(() => {
+    fetch("https://insert-back.duckdns.org/api/auth/me", {
+        method: "GET",
+        credentials: "include",
+    })
+        .then(res => {
+            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+            return res.json();
+        })
+        .then(data => {
+            setName(data.name);
+            setUserId(data.id); // 여기서 userId 받아오기
+        })
+        .catch(err => console.error("API 호출 실패:", err));
+}, []);
 
     const location = useLocation();
     const navigate = useNavigate();
 
     const recommendations = location.state?.recommendations?.data?.recommendations || [];
 
-    const user = localStorage.getItem("user_name");
-
     const handleAddToSchedule = async () => {
-        const userId = localStorage.getItem("user_id"); // 저장한 user_id
-        const eventId = 1; // 현재 일정 ID, 실제 값으로 바꿔야 함
+        if (!userId) {
+            alert("유저 정보 로딩 중입니다.");
+            return;
+        }
 
         try {
-            // for (let placeId of selectedPlaces) {
-            //     const response = await fetch("/api/schedules/places", {
-            //         method: "POST",
-            //         headers: { "Content-Type": "application/json" },
-            //         body: JSON.stringify({
-            //             userId: Number(userId),
-            //             eventId: eventId,
-            //             placeId: placeId
-            //         }),
-            //     });
-
-            //     if (!response.ok) {
-            //         throw new Error("서버 에러");
-            //     }
-            // }
-            // alert("선택한 장소가 일정에 추가되었습니다!");
-            fetch("/api/schedules/places", {
+            await Promise.all(selectedPlaces.map(placeId =>
+            fetch("https://insert-back.duckdns.org/api/schedules/places", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ userId: 1, eventId: 1, placeId: 1 })
+                body: JSON.stringify({
+                    userId: userId,
+                    eventId: 1,          // 필요한 eventId
+                    placeId: placeId
+                }),
+                credentials: "include", // 쿠키 인증 포함
             })
-            setSelectMode(false);
-            setSelectedPlaces([]);
-            navigate("/VisitSchedulePage")
+        ));
+        setSelectMode(false);
+        setSelectedPlaces([]);
+        navigate("/VisitSchedulePage");
         } catch (err) {
             console.error(err);
             alert("장소 추가 실패");
@@ -272,7 +281,7 @@ function RecommendPage() {
     return (
         <Container>
             <PreIcon></PreIcon>
-            <PageTitle>{user} 님을 위한<br></br> 오늘의 추천 장소입니다.</PageTitle>
+            <PageTitle>{name} 님을 위한<br></br> 오늘의 추천 장소입니다.</PageTitle>
             <PageSubTitle>Insert가 알려준 추천 장소로 인천을 즐겨 보세요.</PageSubTitle>
             {recommendations.map((categoryItem) => (
                 <div key={categoryItem.category}>
