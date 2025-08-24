@@ -1,181 +1,259 @@
-import { styled } from "styled-components";
+// src/pages/InformationPage.jsx
+import React, { useEffect, useState } from "react";
+import styled from "styled-components";
 import Button from "../components/Button";
-import { ReactComponent as StarIcon } from "../assets/icons/star.svg"; // SVG import
+import { ReactComponent as StarIcon } from "../assets/icons/star.svg";
 import { ReactComponent as FavariteIcon } from "../assets/icons/favorite.svg";
 import { ReactComponent as ShareIcon } from "../assets/icons/share.svg";
+import { useParams, useNavigate } from "react-router-dom";
 
+// 상세 페이지(사진 포함) 조회 컴포넌트
+export default function InformationPage() {
+  const navigate = useNavigate();
+  const { externalId } = useParams();
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [err, setErr] = useState("");
 
+  const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:8080";
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch(`${API_BASE}/api/performs/by-external/${externalId}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const json = await res.json();
+        setData(json);
+      } catch (e) {
+        console.error(e);
+        setErr("상세 정보를 불러오지 못했습니다.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (externalId) load();
+  }, [externalId, API_BASE]);
+
+  if (loading) return <Center>불러오는 중…</Center>;
+  if (err) return <Center>{err}</Center>;
+  if (!data) return <Center>데이터가 없습니다.</Center>;
+
+  const dateRange =
+    data.startDate && data.endDate
+      ? `${data.startDate} ~ ${data.endDate}`
+      : data.startDate || "";
+
+  return (
+    <Container>
+      <ConcertImage $bg={data.posterUrl} />
+      <ConcertInformation>
+        <ConcertTitle>{data.title}</ConcertTitle>
+        <ConcertSchedule>{dateRange}</ConcertSchedule>
+        <ConcertVenue>{data.venueName}</ConcertVenue>
+        <ConcertContents>{data.synopsis}</ConcertContents>
+
+        {/* 버튼 라벨을 두번째 디자인처럼 "Go"로, 동작은 유지 */}
+        <Button
+          variant="filled"
+          size="small"
+          style={{ width: "70px" }}
+          onClick={() => navigate("/insertplace")}
+        >
+          Go
+        </Button>
+
+        <MenuList>
+          <Menu>
+            <StarIcon />
+            내가 찜한 리스트
+          </Menu>
+          <Menu>
+            <FavariteIcon />
+            평가
+          </Menu>
+          <Menu>
+            <ShareIcon />
+            공유
+          </Menu>
+        </MenuList>
+
+        {/* 두번째 디자인의 섹션 타이틀 유지 (항상 보이게) */}
+        <InsertReview>인서트 리뷰</InsertReview>
+
+        {/* 리뷰가 있으면 카드 스타일로 노출 */}
+        {Array.isArray(data.reviews) &&
+          data.reviews.map((review, idx) => (
+            <Review key={idx}>
+              <ReviewTitle>{review.title}</ReviewTitle>
+              <ReviewContents>{review.contents}</ReviewContents>
+              <ReviewPhoto photos={review.photos} />
+            </Review>
+          ))}
+      </ConcertInformation>
+    </Container>
+  );
+}
+
+/* ───────── 스타일 (두번째 디자인과 동일) ───────── */
 const Container = styled.div`
-max-width: 600px; min-width: 360px; margin: 0 auto; 
+  max-width: 600px;
+  min-width: 360px;
+  margin: 0 auto;
 `;
 
 const ConcertImage = styled.div`
-width: 100%;
-padding-bottom: 112%; 
-background-image: url(${props => props.$bg});
-background-size: cover;
-background-position: center;
-background-repeat: no-repeat;
-`
+  width: 100%;
+  padding-bottom: 112%;
+  background-image: ${p => (p.$bg ? 'url("' + p.$bg + '")' : "none")};
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+`;
+
 const ConcertInformation = styled.div`
-flex-shrink: 0;
-background: #fff;
-border-radius: 32px 32px 0px 0px;
-font-family: Pretendard;
-padding: 40px 16px;
-margin-top: -40px;
-`
+  flex-shrink: 0;
+  background: #fff;
+  border-radius: 32px 32px 0px 0px;
+  font-family: Pretendard, -apple-system, BlinkMacSystemFont, sans-serif;
+  padding: 40px 16px;
+  margin-top: -40px;
+`;
+
 const ConcertTitle = styled.div`
-color: #000;
-text-align: left;
-font-size: clamp(20px, 5.56vw, 24px); 
-font-style: normal;
-font-weight: 600;
-line-height: normal;
-letter-spacing: -0.1px;
-`
+  color: #000;
+  text-align: left;
+  font-size: clamp(20px, 5.56vw, 24px);
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  letter-spacing: -0.1px;
+`;
+
 const ConcertSchedule = styled.div`
-color: #555;
-font-size: clamp(12px, 3.33vw, 14px); 
-font-style: normal;
-font-weight: 500;
-line-height: normal;
-padding-top: 4px;
-letter-spacing: -0.06px;`
+  color: #555;
+  font-size: clamp(12px, 3.33vw, 14px);
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  padding-top: 4px;
+  letter-spacing: -0.06px;
+`;
+
+const ConcertVenue = styled.div`
+  color: #555;
+  font-size: clamp(12px, 3.33vw, 14px);
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  padding-top: 4px;
+  letter-spacing: -0.06px;
+`;
 
 const ConcertContents = styled.div`
-display: flex;
-flex-direction: column;
-flex-shrink: 0;
-color: #000;
-font-size: clamp(10px, 2.78vw, 12px); 
-font-style: normal;
-font-weight: 300;
-line-height: 130%; /* 13px */
-letter-spacing: -0.05px;
-margin: 13px 0px 22px;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  color: #000;
+  font-size: clamp(10px, 2.78vw, 12px);
+  font-style: normal;
+  font-weight: 300;
+  line-height: 130%;
+  letter-spacing: -0.05px;
+  margin: 13px 0px 22px;
+`;
 
-`
+/* 아이콘 크기: 두번째 디자인처럼 별도 크기 미지정(원본 SVG 크기 사용) */
 const Menu = styled.div`
-display: inline-flex;
-flex-direction: column;
-justify-content: center;
-align-items: center;
-gap: 2px;
-color: #000;
-text-align: center;
-font-family: Pretendard;
-font-size: clamp(8px, 2.22vw, 10px);
-font-style: normal;
-font-weight: 400;
-line-height: 100%; /* 8px */
-letter-spacing: -0.04px;
-`
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 2px;
+  color: #000;
+  text-align: center;
+  font-family: Pretendard;
+  font-size: clamp(8px, 2.22vw, 10px);
+  font-style: normal;
+  font-weight: 400;
+  line-height: 100%;
+  letter-spacing: -0.04px;
+`;
 
 const MenuList = styled.div`
-display:flex;
-justify-content: space-around;  /* 아이콘 기준으로 균등 분배 */
-align-items:center;
-padding: 18px 60px 38px;
-`
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 18px 60px 38px;
+`;
 
 const InsertReview = styled.div`
-color: #000;
-font-family: Pretendard;
-font-size: clamp(16px, 4.44vw, 18px);
-font-style: normal;
-font-weight: 500;
-line-height: normal;
-letter-spacing: -0.08px;`
+  color: #000;
+  font-family: Pretendard;
+  font-size: clamp(16px, 4.44vw, 18px);
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  letter-spacing: -0.08px;
+`;
 
 const Review = styled.div`
-border-radius: 16px;
-border: 0.5px solid #CBCBCB;
-padding: 16px 30px;
-margin-top: 8px;
-`
+  border-radius: 16px;
+  border: 0.5px solid #cbcbcb;
+  padding: 16px 30px;
+  margin-top: 8px;
+`;
 
 const ReviewTitle = styled.div`
-color: #000;
-font-family: Pretendard;
-font-size: clamp(14px, 3.89vw, 16px);
-font-style: normal;
-font-weight: 500;
-line-height: normal;
-letter-spacing: -0.07px;
-`
+  color: #000;
+  font-family: Pretendard;
+  font-size: clamp(14px, 3.89vw, 16px);
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  letter-spacing: -0.07px;
+`;
 
 const ReviewContents = styled.div`
-margin-top:8px;
-color: #555;
-font-family: Pretendard;
-font-size: clamp(12px, 3.33vw, 14px);
-font-style: normal;
-font-weight: 400;
-line-height: normal;
-letter-spacing: -0.06px;
-`
-const ReviewPhotoWrapper = styled.div`
-display: flex;
-gap: 8px;
-overflow-x: auto; /* 여러 장일 때 가로 스크롤 */
-margin-top: 12px;
+  margin-top: 8px;
+  color: #555;
+  font-family: Pretendard;
+  font-size: clamp(12px, 3.33vw, 14px);
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  letter-spacing: -0.06px;
+`;
 
-img {
-max-width: 100px;
-max-height: 100px;
-object-fit: cover;
-border-radius: 8px;
-}
+const ReviewPhotoWrapper = styled.div`
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  margin-top: 12px;
+
+  img {
+    max-width: 100px;
+    max-height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+  }
 `;
 
 const ReviewPhoto = ({ photos = [] }) => {
-    if (!photos.length) return null; // 사진 없으면 아무것도 렌더 안 함
-
-    return (
-        <ReviewPhotoWrapper>
-            {photos.map((src, index) => (
-                <img key={index} src={src} alt={`review-${index}`} />
-            ))}
-        </ReviewPhotoWrapper>
-    );
+  if (!photos?.length) return null;
+  return (
+    <ReviewPhotoWrapper>
+      {photos.map((src, index) => (
+        <img key={index} src={src} alt={`review-${index}`} />
+      ))}
+    </ReviewPhotoWrapper>
+  );
 };
 
-function InformationPage({ concert }) {
-    return (
-        <Container>
-            <ConcertImage $bg={concert.imageUrl}>
-            </ConcertImage>
-            <ConcertInformation>
-                <ConcertTitle>{concert.title}</ConcertTitle>
-                <ConcertSchedule>{concert.schedule}</ConcertSchedule>
-                <ConcertContents>{concert.descripition}</ConcertContents>
-                <Button variant="filled" size="small" style={{ width: "70px"}}>Go</Button>
-                <MenuList>
-                    <Menu>
-                        <StarIcon></StarIcon>
-                        내가 찜한 리스트
-                    </Menu>
-                    <Menu>
-                        <FavariteIcon></FavariteIcon>
-                        평가
-                    </Menu>
-                    <Menu>
-                        <ShareIcon></ShareIcon>
-                        공유
-                    </Menu>
-                </MenuList>
-            <InsertReview>인서트 리뷰</InsertReview>
-            {concert.reviews.map((review, idx) => (
-                    <Review key={idx}>
-                        <ReviewTitle>{review.title}</ReviewTitle>
-                        <ReviewContents>{review.contents}</ReviewContents>
-                        <ReviewPhoto photos={review.photos} />
-                    </Review>
-                ))}
-            </ConcertInformation>
-        </Container>
-    )
-}
-
-export default InformationPage;
+const Center = styled.div`
+  max-width: 600px;
+  min-width: 360px;
+  margin: 80px auto;
+  text-align: center;
+  font-family: Pretendard, -apple-system, BlinkMacSystemFont, sans-serif;
+`;

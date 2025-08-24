@@ -240,6 +240,7 @@ function VisitSchedulePage() {
                     level={6}
                 />
                 <PlaceSlider>
+
                     {places.map((p) => (
                         <PlaceWrapper key={p.id}>
                             <PlaceHeader>
