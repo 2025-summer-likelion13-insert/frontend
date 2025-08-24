@@ -49,54 +49,19 @@ export default function Home() {
   const [error, setError] = useState(null);
 
   const [likes, setLikes] = useState({});
-/*
-const normalize = (arr = []) =>
-  arr.map((it, i) => ({
-    id: it?.id ?? `tmp-${i}`,
-    externalId: it?.mt20id
-      ? String(it.mt20id)
-      : it?.externalId
-      ? String(it.externalId)
-      : null,   // ← undefined 방지
-    title: it?.prfnm ?? it?.title ?? '',
-    image: it?.poster ?? it?.posterUrl ?? it?.image ?? ''
-  }));
-*/
+
 const normalize = (arr=[]) => arr.map((it,i)=>({
   id: it.mt20id ?? it.id ?? `tmp-${i}`,
   externalId: it.mt20id ?? it.externalId ?? '',   // ← 홈에서도 꼭 설정
   title: it.prfnm ?? it.title ?? '',
   image: imgUrl(it.poster ?? it.posterUrl ?? it.image ?? ''),
 }));
-/** 안전 fetch(JSON) */
-/*
-const getJson = async (url, signal) => {
-  const res = await fetch(url, { method: 'GET', signal });
-  if (!res.ok) throw new Error(`${url} ${res.status}`);
-  return res.json();
-};
-*/
+
   const getJson = async (path, signal) => {
     // api는 내부에서 `${API_BASE}${path}`를 처리합니다.
     return await api(path, { signal });
   };
 
-  /** TOP10 공연 불러오기 */
-  /*
-const fetchTop10 = async (signal) => {
-  try {
-    setLoading(p => ({ ...p, top10: true }));
-    const data = await getJson('/api/performs/fixed/top10', signal);
-    setTop10(normalize(data));
-  } catch (e) {
-    setError('TOP10 불러오기 실패');
-    setTop10([]);
-    console.error(e);
-  } finally {
-    setLoading(p => ({ ...p, top10: false }));
-  }
-};
-*/
   const fetchTop10 = async (signal) => {
     try {
       setLoading((p) => ({ ...p, top10: true }));
@@ -180,6 +145,10 @@ useEffect(() => {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  const heroItem = (top10[0]) ?? (upcoming[0]) ?? null;
+  const heroTitle = heroItem?.title ? String(heroItem.title) : '';
+  const [h1, h2] = heroTitle ? heroTitle.split(/\s+/).slice(0,2) : ['',''];
+
   return (
     <AppWrap>
       <GlobalStyle />
@@ -206,10 +175,10 @@ useEffect(() => {
 
       <HeroCard>
         <HeroInner>
-          <HeroImage src={homeMainImage} alt="concert hero" />
+          <HeroImage src={heroItem?.image || homeMainImage} alt={heroTitle || 'hero'} />
           <HeroShade />
           <HeroContent>
-            <HeroTitle>콜드플레이<br />내한 공연</HeroTitle>
+            <HeroTitle>{h1}{h2 && <><br />{h2}</>}</HeroTitle>
             <HeroActions>
               <Button variant="filled" size="medium">
                 <Icon icon="mdi-light:check" width="24" height="24" style={{ color: '#FFFFFF' }} />
