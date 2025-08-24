@@ -17,11 +17,8 @@ const asArray = (d) => {
   return d.data || d.list || d.items || d.content || [];
 };
 
-// 🔒 배포 환경에서 rawBase가 실수로 localhost면 강제로 교체
 export const API_BASE =
-  (typeof window !== "undefined" && window.location.hostname !== "localhost" && /localhost|127\.0\.0\.1/.test(rawBase))
-    ? "https://insert-back.duckdns.org"
-    : rawBase;
+  process.env.REACT_APP_API_BASE || "https://insert-back.duckdns.org";
 
 export async function api(path, opts = {}) {
   const url = path.startsWith("http") ? path : `${API_BASE}${path}`;
