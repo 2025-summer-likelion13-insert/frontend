@@ -61,14 +61,25 @@ export default function InformationPage() {
         <ConcertSchedule>{dateRange}</ConcertSchedule>
         <ConcertVenue>{data.venueName}</ConcertVenue>
         <ConcertContents>{data.synopsis}</ConcertContents>
+        <div>Debug externalId: {data?.externalId}</div>
         <Button
           variant="filled"
           size="small"
           style={{ width: "70px" }}
+          type="button"
           onClick={() => {
-            console.log("externalId:", data.externalId);
-            navigate(`/insertplace/${data.externalId}`, { state: { concertData: data } });
-          }}>
+            // externalId가 있는지 확인
+            if (!data || !data.externalId) {
+              alert("externalId가 없습니다. 이동할 수 없습니다.");
+              return;
+            }
+
+            // 버튼 클릭 시 navigate
+            navigate(`/insertplace/${data.externalId}`, {
+              state: { concertData: data },
+            });
+          }}
+        >
           Go
         </Button>
 
