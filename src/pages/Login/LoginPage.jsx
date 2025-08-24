@@ -1,0 +1,74 @@
+import { styled } from "styled-components";
+import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
+import Button from "../../components/Button";
+import { ReactComponent as GoogleIcon } from "../../assets/icons/google.svg"
+import { ReactComponent as Character } from "../../assets/icons/character.svg"
+import { useNavigate } from "react-router-dom";
+
+const Container = styled.div`
+max-width: 600px; min-width: 360px; margin: 0 auto; 
+padding: 18px;
+`;
+
+const InsertTitleWrapper = styled.div`
+position: absolute; /* 화면 기준 위치 */
+top: 40%;
+left: 50%;
+transform: translate(-50%, -50%); /* 중앙 맞춤 */
+text-align: center; /* 텍스트 중앙 정렬 */
+`;
+
+const InsertTitle = styled.div`
+color: #DF3B1E;
+font-family: Pretendard;
+font-size: 50px;
+font-weight: 800;
+letter-spacing: -0.25px;
+`;
+
+const InsertSub = styled.div`
+color: #000;
+font-family: Pretendard;
+font-size: 20px;
+font-weight: 500;
+letter-spacing: 0.02px;
+margin-top: 24px; /* 제목과 서브 간격 */
+line-height: 130%; 
+`;
+
+const ButtonWrapper = styled.div`
+display: flex;
+justify-content: center;
+position: absolute;
+top: 70%; // 타이틀보다 아래
+left: 50%;
+transform: translateX(-50%); `;
+
+const LoginButton = styled.button`
+display: inline-flex;
+padding: 8px 24px;
+align-items: center;
+gap: 8px;
+border-radius: 5px;
+border: 1px solid #D9D9D9;
+background: #FFF;`
+
+function LoginPage() {
+    const navigate = useNavigate();
+    return (
+        <Container>
+            <InsertTitleWrapper>
+                <Character></Character>
+                <InsertTitle>InSert</InsertTitle>
+                <InsertSub>하루의 특별한 순간<br></br>InSert가 함께 할게요.</InsertSub>
+            </InsertTitleWrapper>
+            <ButtonWrapper onClick={()=>navigate("/NameSettingPage")}>
+                <LoginButton>
+                    <GoogleIcon />Google 계정으로 시작하기</LoginButton>
+            </ButtonWrapper>
+        </Container>
+    )
+}
+
+export default LoginPage;

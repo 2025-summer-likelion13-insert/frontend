@@ -4,8 +4,12 @@ import VisitSchedulePage from "./pages/VisitSchedulePage";
 import InformationPage from "./pages/InformationPage";
 import RecommendPage from "./pages/RecommendPage";
 import InsertPlacePage from "./pages/InsertPlacePage";
+import LoginPage from './pages/Login/LoginPage';
+import NameSettingPage from './pages/Login/NameSettingPage'
+import WelcomePage from './pages/Login/WelcomePage';
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import ProfileSettingPage from './pages/ProfileSettingPage';
 
 function App() {
   return (
@@ -28,8 +32,12 @@ function App() {
 
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<InsertPlacePage  />} />
+        <Route path="/" element={<LoginPage  />} />
         <Route path="/Recommendpage" element={<RecommendPage  />} />
+        <Route path="/InsertPlacePage" element={<InsertPlacePage  />} />
+        <Route path="/NameSettingPage" element={<NameSettingPage  />} />
+        <Route path="/WelcomePage" element={<WelcomePage  />} />
+        <Route path="/ProfileSettingPage" element={<ProfileSettingPage  />} />
 
       </Routes>
     </BrowserRouter>
