@@ -149,8 +149,10 @@ function InsertPlacePage() {
     const navigate = useNavigate();
     const location = useLocation();
     const { externalId } = useParams();
-    
-    const concertData = location.state?.concertData;
+
+    const [concertData, setConcertData] = useState(location.state?.concertData || null);
+    const [loading, setLoading] = useState(!concertData);
+    const [error, setError] = useState("");
 
 
     const Profileitems = [
@@ -170,6 +172,23 @@ function InsertPlacePage() {
     const [activeId2, setActiveId2] = useState(Vehicleitems[0].id);
     const [customConditions, setCustomConditions] = useState(""); // textarea
 
+    useEffect(() => {
+        if (!concertData && externalId) {
+            const fetchData = async () => {
+                try {
+                    setLoading(true);
+                    const data = await api(`/api/performs/by-external/${externalId}`);
+                    setConcertData(data);
+                } catch (e) {
+                    console.error(e);
+                    setError("공연 데이터를 불러오지 못했습니다.");
+                } finally {
+                    setLoading(false);
+                }
+            };
+            fetchData();
+        }
+    }, [concertData, externalId]);
 
     function handleSubmit() {
         const selected1 = Profileitems.find((i) => i.id === activeId1);
@@ -210,6 +229,10 @@ function InsertPlacePage() {
             .catch((err) => console.error(err));
     }
 
+    if (loading) return <Container>불러오는 중…</Container>;
+    if (error) return <Container>{error}</Container>;
+    if (!concertData) return <Container>데이터가 없습니다.</Container>;
+    
     return (
         <Container>
             <Header>
