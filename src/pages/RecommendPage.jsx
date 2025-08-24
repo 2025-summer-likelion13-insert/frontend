@@ -4,6 +4,7 @@ import { ReactComponent as PreIcon } from "../assets/icons/previous.svg";
 import { ReactComponent as SaveIcon } from "../assets/icons/save.svg";
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const Container = styled.div`
 max-width: 600px; min-width: 360px; margin: 0 auto; 
@@ -193,7 +194,7 @@ z-index: 1000;
 function DraggableModal({ place, onClose }) {
     const [startY, setStartY] = useState(null);
 
-     // 별을 숫자만큼 배열로 채워 넣기
+    // 별을 숫자만큼 배열로 채워 넣기
     const renderStars = (count) => {
         return Array.from({ length: count }, (_, i) => (
             <span key={i}>★</span>
@@ -202,22 +203,22 @@ function DraggableModal({ place, onClose }) {
 
     return (
         <ModalBackground onClick={onClose}>
-        <Modal onClick={(e)=> e.stopPropagation()}
-        >
-            <ModalTop>
-                <ModalName>{place.name}</ModalName>
-            </ModalTop>
-            <ModalTop>
-                <ModalRate>{place.rating}</ModalRate>
-                <ModalStar>{renderStars(place.rating)}</ModalStar>
-            </ModalTop>
-            <ModalContent>{place.description}</ModalContent>
-            {place.imageUrl && (
-                <ModalImages>
-                    <ModalImage src={place.imageUrl} alt={place.name} />
-                </ModalImages>
-            )}
-        </Modal>
+            <Modal onClick={(e) => e.stopPropagation()}
+            >
+                <ModalTop>
+                    <ModalName>{place.name}</ModalName>
+                </ModalTop>
+                <ModalTop>
+                    <ModalRate>{place.rating}</ModalRate>
+                    <ModalStar>{renderStars(place.rating)}</ModalStar>
+                </ModalTop>
+                <ModalContent>{place.description}</ModalContent>
+                {place.imageUrl && (
+                    <ModalImages>
+                        <ModalImage src={place.imageUrl} alt={place.name} />
+                    </ModalImages>
+                )}
+            </Modal>
         </ModalBackground>
     );
 }
@@ -228,13 +229,50 @@ function RecommendPage() {
     const [activePlace, setActivePlace] = useState(null); // 정보창에 띄울 장소
 
     const location = useLocation();
+    const navigate = useNavigate();
+
     const recommendations = location.state?.recommendations?.data?.recommendations || [];
 
+    const user = localStorage.getItem("user_name");
 
+    const handleAddToSchedule = async () => {
+        const userId = localStorage.getItem("user_id"); // 저장한 user_id
+        const eventId = 1; // 현재 일정 ID, 실제 값으로 바꿔야 함
+
+        try {
+            // for (let placeId of selectedPlaces) {
+            //     const response = await fetch("/api/schedules/places", {
+            //         method: "POST",
+            //         headers: { "Content-Type": "application/json" },
+            //         body: JSON.stringify({
+            //             userId: Number(userId),
+            //             eventId: eventId,
+            //             placeId: placeId
+            //         }),
+            //     });
+
+            //     if (!response.ok) {
+            //         throw new Error("서버 에러");
+            //     }
+            // }
+            // alert("선택한 장소가 일정에 추가되었습니다!");
+            fetch("/api/schedules/places", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ userId: 1, eventId: 1, placeId: 1 })
+            })
+            setSelectMode(false);
+            setSelectedPlaces([]);
+            navigate("/VisitSchedulePage")
+        } catch (err) {
+            console.error(err);
+            alert("장소 추가 실패");
+        }
+    };
     return (
         <Container>
             <PreIcon></PreIcon>
-            <PageTitle>님을 위한<br></br> 오늘의 추천 장소입니다.</PageTitle>
+            <PageTitle>{user} 님을 위한<br></br> 오늘의 추천 장소입니다.</PageTitle>
             <PageSubTitle>Insert가 알려준 추천 장소로 인천을 즐겨 보세요.</PageSubTitle>
             {recommendations.map((categoryItem) => (
                 <div key={categoryItem.category}>
@@ -271,7 +309,19 @@ function RecommendPage() {
                 </div>
             ))}
             <div style={{ display: "flex", justifyContent: "center", marginTop: "16px" }}>
-                <Button variant="filled" size="small" icon={<SaveIcon />} onClick={() => setSelectMode(!selectMode)}>  {selectMode ? "선택 완료" : "장소 선택하기"}
+                <Button
+                    variant="filled"
+                    size="small"
+                    icon={<SaveIcon />}
+                    onClick={() => {
+                        if (selectMode) {
+                            handleAddToSchedule(); // 선택 완료 시 서버 전송
+                        } else {
+                            setSelectMode(true); // 선택 모드 시작
+                        }
+                    }}
+                >
+                    {selectMode ? "선택 완료" : "장소 선택하기"}
                 </Button>
             </div>
             {activePlace && <DraggableModal place={activePlace} onClose={() => setActivePlace(null)} />}

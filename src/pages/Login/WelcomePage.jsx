@@ -51,6 +51,7 @@ function WelcomePage() {
             <WelcomeText>환영합니다!</WelcomeText>
             </Wrapper>
         </Container>
+        //몇 초 후 메인 홈으로 이동하는 페이지 만들 것.
     )
 }
 

@@ -187,47 +187,51 @@ margin-top: 8px;
 
 function VisitSchedulePage() {
 
-    const places = {
-        "success": true,
-        "data": [
-            {
-                "id": 1,
-                "name": "문학동 조용한 카페",
-                "description": "경기장 근처 조용한 카페",
-                "imageUrl": "https://example.com/cafe.jpg",
-                "address": "인천광역시 미추홀구 문학동",
-                "rating": 4.5,
-                "priceRange": "저렴",
-                "openingHours": "09:00-22:00",
-                "aiReason": "조용한 분위기로 경기 전후 휴식하기 좋음",
-                "distanceFromVenue": 0.3,
-                "hasReview": false
+    const [places, setPlaces] = useState([]);
+    const userId = 1; // 저장한 user_id
+    const user = localStorage.getItem("user_name");
+    const eventId = 1; // 현재 이벤트 ID
+
+    useEffect(() => {
+        const fetchSchedule = async () => {
+            try {
+                const res = await fetch(`/api/schedules/users/${userId}/events/${eventId}`);
+                if (!res.ok) throw new Error("서버 에러");
+                const data = await res.json();
+                setPlaces(data.data);
+            } catch (err) {
+                console.error(err);
+                alert("일정 조회 실패");
             }
-        ],
-        "message": "사용자 일정을 성공적으로 조회했습니다."
-    }
+        };
+
+        fetchSchedule();
+    }, [userId, eventId]);
+
     return (
         <Container>
             <Header>
-                <PageTitle> 님을 위한<br></br> <Highlight>오늘의 방문 일정</Highlight>입니다.</PageTitle>
+                <PageTitle>{user} 님을 위한<br></br> <Highlight>오늘의 방문 일정</Highlight>입니다.</PageTitle>
                 <Share></Share>
             </Header>
             <InfoBoxWrapper>
-                <InfoBox>
-                    <InfoImage />
-                    <InfoText>
-                        <ConcertTitle>dfdfd</ConcertTitle>
-                        <InfoRow>
-                            <Location></Location>
-                            <InfoRowText>dfd</InfoRowText>
-                        </InfoRow>
-                        <InfoRow>
-                            <Calender></Calender>
-                            <InfoRowText>dfdfd</InfoRowText>
-                        </InfoRow>
-                        <ConcertContents>dfdfd</ConcertContents>
-                    </InfoText>
-                </InfoBox>
+                {places.map(p => (
+                    <InfoBox key={p.id}>
+                        <InfoImage src={p.imageUrl} alt={p.name} />
+                        <InfoText>
+                            <ConcertTitle>{p.name}</ConcertTitle>
+                            <InfoRow>
+                                <Location />
+                                <InfoRowText>{p.address}</InfoRowText>
+                            </InfoRow>
+                            <InfoRow>
+                                <Calender />
+                                <InfoRowText>{p.openingHours}</InfoRowText>
+                            </InfoRow>
+                            <ConcertContents>{p.aiReason}</ConcertContents>
+                        </InfoText>
+                    </InfoBox>
+                ))}
             </InfoBoxWrapper>
             <MapWrapper>
                 <Map
@@ -236,9 +240,9 @@ function VisitSchedulePage() {
                     level={6}
                 />
                 <PlaceSlider>
-                    {places.data.map((p)=> (
+                    {places.map((p) => (
                         <PlaceWrapper key={p.id}>
-                        <PlaceHeader>
+                            <PlaceHeader>
                                 <PlaceImage src={p.imageUrl} alt={p.name} />
                                 <PlaceTextWrapper>
                                     <PlaceTitle>{p.name}</PlaceTitle>

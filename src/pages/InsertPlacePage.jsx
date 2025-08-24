@@ -183,11 +183,11 @@ function InsertPlacePage() {
         const profileTypeValue = profileMap[selected1.text];
         const vehicleTypeValue = vehicleMap[selected2.text];
 
-        fetch("http://localhost:8080/api/place-recommendations/recommendations", {
+        fetch("/api/place-recommendations/recommendations", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                venueName: "인천문학경기장",
+                venueName: "인스파이어 아레나",
                 profileType: profileTypeValue,
                 transportationMethod: vehicleTypeValue,
                 customConditions: customConditions

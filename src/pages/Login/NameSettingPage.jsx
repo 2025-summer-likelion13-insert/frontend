@@ -130,6 +130,16 @@ function NameSettingPage() {
         setIsValid(regex.test(value));
     };
 
+    const handleMoveNext = () => {
+    if (!isValid) return;
+
+    // 입력한 닉네임을 user_id로 저장
+    localStorage.setItem("user_name", name);
+
+    // 다음 페이지로 이동
+    navigate("/WelcomePage"); // 원하는 경로
+};
+
     return (
         <Container>
             <Logo>InSert</Logo>
@@ -152,6 +162,7 @@ function NameSettingPage() {
                         cursor: isValid ? "pointer" : "not-allowed",
                     }}
                     disabled={!isValid}
+                    onClick={handleMoveNext}
                 >
                     →
                 </MoveButton>

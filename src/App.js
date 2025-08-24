@@ -38,6 +38,7 @@ function App() {
         <Route path="/NameSettingPage" element={<NameSettingPage  />} />
         <Route path="/WelcomePage" element={<WelcomePage  />} />
         <Route path="/ProfileSettingPage" element={<ProfileSettingPage  />} />
+        <Route path="/VisitSchedulePage" element={<VisitSchedulePage  />} />
 
       </Routes>
     </BrowserRouter>
