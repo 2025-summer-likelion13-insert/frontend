@@ -34,7 +34,6 @@ function App() {
         <Route path="/myreview" element={<MyReviewPage />} />
         <Route path="/myvisit" element={<MyVisitSchedule />} />
         <Route path="/information/:externalId" element={<InformationPage />} />
-        <Route path="/insertplace" element={<InsertPlacePage />} />
         <Route path="/visitschedule" element={<VisitSchedulePage />} />        
         <Route path="/mypage" element={<MyPage />} />
         <Route path="/" element={<LoginPage  />} />

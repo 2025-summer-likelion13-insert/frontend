@@ -147,7 +147,6 @@ gap: 13px;        // 아이템 사이 간격 고정
 
 function InsertPlacePage() {
     const navigate = useNavigate();
-    const { externalId } = useParams();      // URL param
     const location = useLocation();
     const concertData = location.state?.concertData;
 
