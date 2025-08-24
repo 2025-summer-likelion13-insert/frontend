@@ -22,11 +22,12 @@ export default function InformationPage() {
       return;
     }
 
+
     const load = async () => {
       try {
     setLoading(true);
     const res = await fetch(
-      `${process.env.REACT_APP_API_BASE}/api/performs/by-external/${externalId}`
+      `${process.env.REACT_APP_API_URL}/api/performs/by-external/${externalId}`
     );
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const json = await res.json();
