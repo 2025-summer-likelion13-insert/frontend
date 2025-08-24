@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 
@@ -11,19 +12,24 @@ import ReviewMainPage from './pages/Review/ReviewMainPage';
 import MyWishlistPage from './pages/MyPage/MyWishlistPage';
 import MyReviewPage from './pages/MyPage/MyReviewPage';
 import MyVisitSchedule from './pages/MyPage/MyVisitSchedule';
-import InformationPage from './pages/InformationPage';
-import VisitSchedulePage from './pages/VisitSchedulePage';
-import InsertPlacePage from './pages/InsertPlacePage';
 
-function AppInner() {
-  const location = useLocation();
-  const HIDE_TABS = ['/mywishlist'];
-  const showTabs = !HIDE_TABS.some((p) => location.pathname.startsWith(p));
+import VisitSchedulePage from "./pages/VisitSchedulePage";
+import InformationPage from "./pages/InformationPage";
+import RecommendPage from "./pages/RecommendPage";
+import InsertPlacePage from "./pages/InsertPlacePage";
+import LoginPage from './pages/Login/LoginPage';
+import NameSettingPage from './pages/Login/NameSettingPage'
+import WelcomePage from './pages/Login/WelcomePage';
+import ProfileSettingPage from './pages/ProfileSettingPage';
+
 
   return (
-    <>
+
+    
+
+    <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/home" element={<Home />} />
         <Route path="/detail/:externalISd" element={<DetailPage />} />
         <Route path="/search" element={<SearchPage/>}/>
         <Route path="/review/write" element={<ReviewWritePage />} />
@@ -35,18 +41,20 @@ function AppInner() {
         <Route path="/insertplace" element={<InsertPlacePage />} />
         <Route path="/visitschedule" element={<VisitSchedulePage />} />        
         <Route path="/mypage" element={<MyPage />} />
+
+        <Route path="/" element={<LoginPage  />} />
+        <Route path="/Recommendpage" element={<RecommendPage  />} />
+        <Route path="/InsertPlacePage" element={<InsertPlacePage  />} />
+        <Route path="/NameSettingPage" element={<NameSettingPage  />} />
+        <Route path="/WelcomePage" element={<WelcomePage  />} />
+        <Route path="/ProfileSettingPage" element={<ProfileSettingPage  />} />
+        <Route path="/VisitSchedulePage" element={<VisitSchedulePage  />} />
+
       </Routes>
-
-      {showTabs && <TabNavigation />}
-    </>
-  );
-}
-
-// BrowserRouter는 최상위에서 한 번만 감싸줌
-export default function App() {
-  return (
-    <BrowserRouter>
-      <AppInner />
+      <TabNavigation />
     </BrowserRouter>
+
   );
-}
+};
+
+export default App;
