@@ -63,7 +63,10 @@ export default function InformationPage() {
           variant="filled"
           size="small"
           style={{ width: "70px" }}
-          onClick={() => navigate(`/insertplace/${data.externalId}`, { state: { concertData: data } })}
+          onClick={() => {
+            console.log("externalId:", data.externalId); // 여기 찍힘
+            navigate(`/insertplace/${data.externalId}`, { state: { concertData: data } });
+          }}
         >
           Go
         </Button>
