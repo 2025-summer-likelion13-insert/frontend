@@ -5,7 +5,7 @@
 // - 하단에 API_BASE 디버그 라벨 추가(연결 확인용)
 
 import { API_BASE } from "../../lib/api";
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import colors from '../../styles/colors';
