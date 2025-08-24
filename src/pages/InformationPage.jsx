@@ -6,6 +6,7 @@ import { ReactComponent as StarIcon } from "../assets/icons/star.svg";
 import { ReactComponent as FavariteIcon } from "../assets/icons/favorite.svg";
 import { ReactComponent as ShareIcon } from "../assets/icons/share.svg";
 import { useParams, useNavigate } from "react-router-dom";
+import { api } from "../../lib/api";
 
 // 상세 페이지(사진 포함) 조회 컴포넌트
 export default function InformationPage() {
@@ -25,23 +26,19 @@ export default function InformationPage() {
 
     const load = async () => {
       try {
-    setLoading(true);
-    const res = await fetch(
-      `${process.env.REACT_APP_API_URL}/api/performs/by-external/${externalId}`
-    );
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const json = await res.json();
-    setData(json);
-  } catch (e) {
-    console.error(e);
-    setErr("상세 정보를 불러오지 못했습니다.");
-  } finally {
-    setLoading(false);
-  }
-};
-load();
-  }, [externalId]);
+        setLoading(true);
+        const data = await api(`/api/performs/by-external/${externalId}`);
+        setData(data);
+      } catch (e) {
+        console.error(e);
+        setErr("상세 정보를 불러오지 못했습니다.");
+      } finally {
+        setLoading(false);
+      }
+    };
 
+    load();
+  }, [externalId]);
 
   if (loading) return <Center>불러오는 중…</Center>;
   if (err) return <Center>{err}</Center>;
