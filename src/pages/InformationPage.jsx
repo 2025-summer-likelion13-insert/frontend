@@ -24,17 +24,21 @@ export default function InformationPage() {
 
     const load = async () => {
       try {
-        setLoading(true);
-        const json = await api(`/api/performs/by-external/${externalId}`);
-        setData(json);
-      } catch (e) {
-        console.error(e);
-        setErr("상세 정보를 불러오지 못했습니다.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
+    setLoading(true);
+    const res = await fetch(
+      `${process.env.REACT_APP_API_BASE}/api/performs/by-external/${externalId}`
+    );
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const json = await res.json();
+    setData(json);
+  } catch (e) {
+    console.error(e);
+    setErr("상세 정보를 불러오지 못했습니다.");
+  } finally {
+    setLoading(false);
+  }
+};
+load();
   }, [externalId]);
 
 
