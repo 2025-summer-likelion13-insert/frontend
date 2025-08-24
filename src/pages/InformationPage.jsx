@@ -15,15 +15,17 @@ export default function InformationPage() {
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
 
-  const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:8080";
-
   useEffect(() => {
+    if (!externalId) {
+      setErr("유효하지 않은 공연 ID입니다.");
+      setLoading(false);
+      return;
+    }
+
     const load = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`${API_BASE}/api/performs/by-external/${externalId}`);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const json = await res.json();
+        const json = await api(`/api/performs/by-external/${externalId}`);
         setData(json);
       } catch (e) {
         console.error(e);
@@ -32,8 +34,9 @@ export default function InformationPage() {
         setLoading(false);
       }
     };
-    if (externalId) load();
-  }, [externalId, API_BASE]);
+    load();
+  }, [externalId]);
+
 
   if (loading) return <Center>불러오는 중…</Center>;
   if (err) return <Center>{err}</Center>;
