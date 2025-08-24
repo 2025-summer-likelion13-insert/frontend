@@ -97,7 +97,7 @@ const navigate = useNavigate();
             credentials: "include",
         })
             .then(res => {
-                if (res.status === 200) navigate("/NameSettingPage"); // 이미 로그인 됐으면 바로 이동
+                if (res.status === 200) navigate("/home"); // 이미 로그인 됐으면 바로 이동
             })
             .catch(() => console.log("로그인 필요"));
     }, [navigate]);
