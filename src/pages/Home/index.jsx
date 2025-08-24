@@ -66,7 +66,7 @@ const normalize = (arr=[]) => arr.map((it,i)=>({
   id: it.mt20id ?? it.id ?? `tmp-${i}`,
   externalId: it.mt20id ?? it.externalId ?? '',   // ← 홈에서도 꼭 설정
   title: it.prfnm ?? it.title ?? '',
-  image: it.poster ?? it.posterUrl ?? it.image ?? '',
+  image: imgUrl(it.poster ?? it.posterUrl ?? it.image ?? ''),
 }));
 /** 안전 fetch(JSON) */
 /*
@@ -308,7 +308,7 @@ useEffect(() => {
             key={ev.id || `s-${index}`}
             $isFirst={index === 0}
             /* $isLast={index === MOCK_EVENTS.length - 1}*/
-            onClick={() => navigate(`/detail/${ev.id || 0}`)}
+            onClick={() => navigate(`/information/${ev.externalId || ev.id || 0}`)}
           >
             <Thumb src={ev.image} alt={parts.join('')} />
             <CardShade />
@@ -317,7 +317,12 @@ useEffect(() => {
               <BottomRow>
                 <TitleBottom>{parts[parts.length === 2 ? 1 : 0]}</TitleBottom>
                 <IconGroup>
-                  <Icon icon="material-symbols:thumb-up" style={{ color: '#FFFFFF', width: 'clamp(11px, 3.05vw, 18px)', height: 'clamp(11px, 3.05vw, 18px)' }} />
+                   <LikeIcon
+                      icon={likes[ev.externalId]?.liked ? "material-symbols:thumb-up-rounded" : "material-symbols:thumb-up-outline"}
+                      style={{ width:'clamp(11px,3.05vw,18px)', height:'clamp(11px,3.05vw,18px)', opacity: ev.externalId ? 1 : 0.35, cursor: ev.externalId ? 'pointer':'not-allowed', pointerEvents: ev.externalId ? 'auto':'none' }}
+                      aria-disabled={!ev.externalId}
+                      onClick={(e)=>{ e.stopPropagation(); if (ev.externalId) toggleLike(ev.externalId); }}
+                    />
                   <Icon icon="mdi:information-outline" style={{ color: '#FFFFFF', width: 'clamp(11px, 3.05vw, 18px)', height: 'clamp(11px, 3.05vw, 18px)' }} />
                 </IconGroup>
               </BottomRow>
