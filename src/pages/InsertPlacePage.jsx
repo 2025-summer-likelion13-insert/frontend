@@ -11,7 +11,8 @@ import { ReactComponent as Car } from "../assets/icons/car.svg";
 import { ReactComponent as Subway } from "../assets/icons/subway.svg";
 import { ReactComponent as Walk } from "../assets/icons/walk.svg";
 import { useNavigate } from "react-router-dom";
-
+import { useLocation } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 import MenuItem from "../components/MenuToggle";
 import { useState } from "react";
@@ -146,6 +147,11 @@ gap: 13px;        // 아이템 사이 간격 고정
 
 function InsertPlacePage() {
     const navigate = useNavigate();
+    const location = useLocation();
+    const { externalId } = useParams();
+    
+    const concertData = location.state?.concertData;
+
 
     const Profileitems = [
         { id: 1, text: "가족", icon: <GroupIcon /> },
@@ -187,7 +193,7 @@ function InsertPlacePage() {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                venueName: "인스파이어 아레나",
+                venueName: concertData.venueName,
                 profileType: profileTypeValue,
                 transportationMethod: vehicleTypeValue,
                 customConditions: customConditions
@@ -216,16 +222,18 @@ function InsertPlacePage() {
             <InfoBox style={{ height: "176px" }}>
                 <InfoImage />
                 <InfoText>
-                    <ConcertTitle>dfdfd</ConcertTitle>
+                    <ConcertTitle>{concertData.title}</ConcertTitle>
                     <InfoRow>
                         <Location></Location>
-                        <InfoRowText>dfd</InfoRowText>
+                        <InfoRowText>{concertData?.venueName}</InfoRowText>
                     </InfoRow>
                     <InfoRow>
                         <Calender></Calender>
-                        <InfoRowText>dfdfd</InfoRowText>
+                        <InfoRowText>{concertData?.startDate && concertData?.endDate
+                            ? `${concertData.startDate} ~ ${concertData.endDate}`
+                            : '-'}</InfoRowText>
                     </InfoRow>
-                    <ConcertContents>dfdfd</ConcertContents>
+                    <ConcertContents>{concertData?.synopsis || ''}</ConcertContents>
                 </InfoText>
             </InfoBox>
             <MenuTitle>프로필 선택</MenuTitle>
