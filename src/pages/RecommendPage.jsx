@@ -3,6 +3,8 @@ import Button from "../components/Button";
 import { ReactComponent as PreIcon } from "../assets/icons/previous.svg";
 import { ReactComponent as SaveIcon } from "../assets/icons/save.svg";
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const Container = styled.div`
 max-width: 600px; min-width: 360px; margin: 0 auto; 
@@ -148,6 +150,9 @@ position: fixed;
 bottom: 0;
 left: 0;
 right: 0;
+max-width: 600px;
+min-width: 360px;
+margin: 0 auto;
 max-height: 70vh;   
 overflow-y: auto;  
 background: white;
@@ -172,24 +177,24 @@ line-height: 100%; /* 10px */
 letter-spacing: 0.01px;
 `
 const ModalStar = styled.div`
-
 `
+const ModalBackground = styled.div`
+position: fixed;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+background: rgba(0,0,0,0.4);
+display: flex;
+justify-content: center;
+align-items: flex-end;
+z-index: 1000;
+`;
+
 function DraggableModal({ place, onClose }) {
     const [startY, setStartY] = useState(null);
 
-    const handleTouchStart = (e) => {
-        setStartY(e.touches[0].clientY);
-    };
-
-    const handleTouchMove = (e) => {
-        if (!startY) return;
-        const deltaY = e.touches[0].clientY - startY;
-        if (deltaY > 100) {
-            onClose();
-        }
-    };
-
-     // 별을 숫자만큼 배열로 채워 넣기
+    // 별을 숫자만큼 배열로 채워 넣기
     const renderStars = (count) => {
         return Array.from({ length: count }, (_, i) => (
             <span key={i}>★</span>
@@ -197,183 +202,79 @@ function DraggableModal({ place, onClose }) {
     };
 
     return (
-        <Modal
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-        >
-            <ModalTop>
-                <ModalName>{place.name}</ModalName>
-            </ModalTop>
-            <ModalTop>
-                <ModalRate>{place.rating}</ModalRate>
-                <ModalStar>{renderStars(place.rating)}</ModalStar>
-            </ModalTop>
-            <ModalContent>{place.description}</ModalContent>
-            {place.imageUrl && (
-                <ModalImages>
-                    <ModalImage src={place.imageUrl} alt={place.name} />
-                </ModalImages>
-            )}
-        </Modal>
+        <ModalBackground onClick={onClose}>
+            <Modal onClick={(e) => e.stopPropagation()}
+            >
+                <ModalTop>
+                    <ModalName>{place.name}</ModalName>
+                </ModalTop>
+                <ModalTop>
+                    <ModalRate>{place.rating}</ModalRate>
+                    <ModalStar>{renderStars(place.rating)}</ModalStar>
+                </ModalTop>
+                <ModalContent>{place.description}</ModalContent>
+                {place.imageUrl && (
+                    <ModalImages>
+                        <ModalImage src={place.imageUrl} alt={place.name} />
+                    </ModalImages>
+                )}
+            </Modal>
+        </ModalBackground>
     );
 }
-
-
 
 function RecommendPage() {
     const [selectMode, setSelectMode] = useState(false); // 버튼 눌렀는지 여부
     const [selectedPlaces, setSelectedPlaces] = useState([]); // 선택된 장소 id 배열
     const [activePlace, setActivePlace] = useState(null); // 정보창에 띄울 장소
 
-    const [recommendations, setRecommendations] = useState([]);
+    const location = useLocation();
+    const navigate = useNavigate();
 
-    useEffect(() => {
-        // 실제 API 호출
-        fetch("/api/recommendations")
-            .then((res) => res.json())
-            .then((json) => {
-                if (json.success) {
-                    setRecommendations(json.data.recommendations);
-                }
-            });
-    }, []);
+    const recommendations = location.state?.recommendations?.data?.recommendations || [];
 
-    const mockReview = {
-        "success": true,
-        "data": {
-            "recommendations": [
-                {
-                    "category": "ACTIVITY",
-                    "places": [
-                        {
-                            "id": 67,
-                            "name": "인천대공원",
-                            "description": "인천문학경기장에서 가까운 대공원으로 데이트하기 좋은 곳입니다.",
-                            "imageUrl": "https://example.com/park.jpg",
-                            "address": "인천광역시 미추홀구 문학동",
-                            "rating": 4.5,
-                            "priceRange": "FREE",
-                            "openingHours": "24시간",
-                            "aiReason": "커플이 데이트하기 좋은 공원으로, 저녁에도 아름다운 조명을 감상할 수 있습니다.",
-                            "distanceFromVenue": 0.8
-                        },
-                        {
-                            "id": 68,
-                            "name": "문학동 벚꽃길",
-                            "description": "봄철 벚꽃이 아름다운 산책로입니다.",
-                            "imageUrl": "https://example.com/cherry.jpg",
-                            "address": "인천광역시 미추홀구 문학동",
-                            "rating": 4.3,
-                            "priceRange": "FREE",
-                            "openingHours": "24시간",
-                            "aiReason": "커플이 산책하며 대화하기 좋은 로맨틱한 분위기의 장소입니다.",
-                            "distanceFromVenue": 1.2
-                        },
-                        {
-                            "id": 69,
-                            "name": "문학동 문화거리",
-                            "description": "다양한 문화시설과 카페가 있는 거리입니다.",
-                            "imageUrl": "https://example.com/culture.jpg",
-                            "address": "인천광역시 미추홀구 문학동",
-                            "rating": 4.1,
-                            "priceRange": "LOW",
-                            "openingHours": "10:00-22:00",
-                            "aiReason": "커플이 문화생활을 즐기며 데이트할 수 있는 다양한 옵션이 있는 장소입니다.",
-                            "distanceFromVenue": 0.5
-                        }
-                    ]
-                },
-                {
-                    "category": "DINING",
-                    "places": [
-                        {
-                            "id": 70,
-                            "name": "문학동 맛집",
-                            "description": "인천문학경기장 근처의 유명한 맛집입니다.",
-                            "imageUrl": "https://example.com/restaurant.jpg",
-                            "address": "인천광역시 미추홀구 문학동",
-                            "rating": 4.7,
-                            "priceRange": "MEDIUM",
-                            "openingHours": "11:00-21:00",
-                            "aiReason": "커플이 저녁 식사를 하며 데이트할 수 있는 분위기 좋은 맛집입니다.",
-                            "distanceFromVenue": 0.3
-                        },
-                        {
-                            "id": 71,
-                            "name": "문학동 카페거리",
-                            "description": "다양한 테마의 카페들이 모여있는 거리입니다.",
-                            "imageUrl": "https://example.com/cafe.jpg",
-                            "address": "인천광역시 미추홀구 문학동",
-                            "rating": 4.4,
-                            "priceRange": "LOW",
-                            "openingHours": "09:00-23:00",
-                            "aiReason": "커플이 커피를 마시며 대화하기 좋은 아늑한 카페들이 많습니다.",
-                            "distanceFromVenue": 0.6
-                        },
-                        {
-                            "id": 72,
-                            "name": "문학동 야시장",
-                            "description": "저녁에 열리는 다양한 먹거리와 놀거리가 있는 야시장입니다.",
-                            "imageUrl": "https://example.com/nightmarket.jpg",
-                            "address": "인천광역시 미추홀구 문학동",
-                            "rating": 4.2,
-                            "priceRange": "LOW",
-                            "openingHours": "18:00-24:00",
-                            "aiReason": "커플이 저녁에 방문하기 좋은 활기찬 분위기의 야시장입니다.",
-                            "distanceFromVenue": 0.4
-                        }
-                    ]
-                },
-                {
-                    "category": "CAFE",
-                    "places": [
-                        {
-                            "id": 73,
-                            "name": "문학동 북카페",
-                            "description": "책을 읽으며 커피를 즐길 수 있는 북카페입니다.",
-                            "imageUrl": "https://example.com/bookcafe.jpg",
-                            "address": "인천광역시 미추홀구 문학동",
-                            "rating": 4.6,
-                            "priceRange": "LOW",
-                            "openingHours": "10:00-22:00",
-                            "aiReason": "커플이 책을 읽으며 조용한 데이트를 즐길 수 있는 문화적인 카페입니다.",
-                            "distanceFromVenue": 0.7
-                        },
-                        {
-                            "id": 74,
-                            "name": "문학동 디저트카페",
-                            "description": "다양한 디저트와 음료를 즐길 수 있는 카페입니다.",
-                            "imageUrl": "https://example.com/dessertcafe.jpg",
-                            "address": "인천광역시 미추홀구 문학동",
-                            "rating": 4.3,
-                            "priceRange": "MEDIUM",
-                            "openingHours": "11:00-21:00",
-                            "aiReason": "커플이 달콤한 디저트를 나누며 로맨틱한 시간을 보낼 수 있는 카페입니다.",
-                            "distanceFromVenue": 0.9
-                        },
-                        {
-                            "id": 75,
-                            "name": "문학동 루프탑카페",
-                            "description": "루프탑에서 도시 전경을 바라보며 커피를 즐길 수 있는 카페입니다.",
-                            "imageUrl": "https://example.com/rooftopcafe.jpg",
-                            "address": "인천광역시 미추홀구 문학동",
-                            "rating": 4.8,
-                            "priceRange": "HIGH",
-                            "openingHours": "12:00-23:00",
-                            "aiReason": "커플이 아름다운 전경을 바라보며 특별한 데이트를 즐길 수 있는 프리미엄 카페입니다.",
-                            "distanceFromVenue": 1.1
-                        }]
-                }]
-        },
-        "message": "장소 추천이 성공적으로 생성되었습니다."
+    const user = localStorage.getItem("user_name");
+
+    const handleAddToSchedule = async () => {
+        const userId = localStorage.getItem("user_id"); // 저장한 user_id
+        const eventId = 1; // 현재 일정 ID, 실제 값으로 바꿔야 함
+
+        try {
+            // for (let placeId of selectedPlaces) {
+            //     const response = await fetch("/api/schedules/places", {
+            //         method: "POST",
+            //         headers: { "Content-Type": "application/json" },
+            //         body: JSON.stringify({
+            //             userId: Number(userId),
+            //             eventId: eventId,
+            //             placeId: placeId
+            //         }),
+            //     });
+
+            //     if (!response.ok) {
+            //         throw new Error("서버 에러");
+            //     }
+            // }
+            // alert("선택한 장소가 일정에 추가되었습니다!");
+            fetch("/api/schedules/places", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ userId: 1, eventId: 1, placeId: 1 })
+            })
+            setSelectMode(false);
+            setSelectedPlaces([]);
+            navigate("/VisitSchedulePage")
+        } catch (err) {
+            console.error(err);
+            alert("장소 추가 실패");
+        }
     };
-
     return (
         <Container>
             <PreIcon></PreIcon>
-            <PageTitle>님을 위한<br></br> 오늘의 추천 장소입니다.</PageTitle>
+            <PageTitle>{user} 님을 위한<br></br> 오늘의 추천 장소입니다.</PageTitle>
             <PageSubTitle>Insert가 알려준 추천 장소로 인천을 즐겨 보세요.</PageSubTitle>
-            {mockReview.data.recommendations.map((categoryItem) => (
+            {recommendations.map((categoryItem) => (
                 <div key={categoryItem.category}>
                     <Category>{categoryItem.category}</Category>
                     {categoryItem.places.map((place) => (
@@ -402,13 +303,25 @@ function RecommendPage() {
                                     <PlaceSubTitle>{place.address}</PlaceSubTitle>
                                 </PlaceTextWrapper>
                             </PlaceHeader>
-                            <PlaceContents>{place.description}</PlaceContents>
+                            <PlaceContents>{place.aiReason}</PlaceContents>
                         </PlaceWrapper>
                     ))}
                 </div>
             ))}
             <div style={{ display: "flex", justifyContent: "center", marginTop: "16px" }}>
-                <Button variant="filled" size="small" icon={<SaveIcon />} onClick={() => setSelectMode(!selectMode)}>  {selectMode ? "선택 완료" : "장소 선택하기"}
+                <Button
+                    variant="filled"
+                    size="small"
+                    icon={<SaveIcon />}
+                    onClick={() => {
+                        if (selectMode) {
+                            handleAddToSchedule(); // 선택 완료 시 서버 전송
+                        } else {
+                            setSelectMode(true); // 선택 모드 시작
+                        }
+                    }}
+                >
+                    {selectMode ? "선택 완료" : "장소 선택하기"}
                 </Button>
             </div>
             {activePlace && <DraggableModal place={activePlace} onClose={() => setActivePlace(null)} />}

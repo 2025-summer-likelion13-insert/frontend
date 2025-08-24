@@ -10,6 +10,7 @@ import { ReactComponent as Bus } from "../assets/icons/bus.svg";
 import { ReactComponent as Car } from "../assets/icons/car.svg";
 import { ReactComponent as Subway } from "../assets/icons/subway.svg";
 import { ReactComponent as Walk } from "../assets/icons/walk.svg";
+import { useNavigate } from "react-router-dom";
 
 
 import MenuItem from "../components/MenuToggle";
@@ -144,6 +145,8 @@ gap: 13px;        // 아이템 사이 간격 고정
 `
 
 function InsertPlacePage() {
+    const navigate = useNavigate();
+
     const Profileitems = [
         { id: 1, text: "가족", icon: <GroupIcon /> },
         { id: 2, text: "혼자", icon: <PersonIcon /> },
@@ -162,26 +165,44 @@ function InsertPlacePage() {
     const [customConditions, setCustomConditions] = useState(""); // textarea
 
 
-    // function handleSubmit() {
-    //     const selected1 = items1.find((i) => i.id === activeId1);
-    //     const selected2 = items2.find((i) => i.id === activeId2);
-    //     fetch("/api/place-recommendations/recommendations", {
-    //         method: "POST",
-    //         headers: { "Content-Type": "application/json" },
-    //         body: JSON.stringify({
-    //             venueName:
-    //             profileType: selected1.text,
-    //             transportationMethod: selected2.text,
-    //             customConditions: customConditions
-    //         }),
-    //     })
-    // .then((res) => res.json())
-    //   .then((data) => {
-    //     // 다음 페이지로 이동, state로 응답 전달
-    //     navigate("/next-page", { state: { recommendations: data } });
-    //   })
-    //   .catch((err) => console.error(err));
-    // }
+    function handleSubmit() {
+        const selected1 = Profileitems.find((i) => i.id === activeId1);
+        const selected2 = Vehicleitems.find((i) => i.id === activeId2);
+        const profileMap = {
+            "가족": "FAMILY",
+            "혼자": "ALONE",
+            "커플": "COUPLE",
+        };
+        const
+            vehicleMap = {
+                "도보": "WALK",
+                "자동차": "CAR",
+                "지하철": "SUBWAY",
+                "버스": "BUS"
+            };
+        const profileTypeValue = profileMap[selected1.text];
+        const vehicleTypeValue = vehicleMap[selected2.text];
+
+        fetch("/api/place-recommendations/recommendations", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                venueName: "인스파이어 아레나",
+                profileType: profileTypeValue,
+                transportationMethod: vehicleTypeValue,
+                customConditions: customConditions
+            }),
+        })
+            .then((res) => {
+                if (!res.ok) throw new Error("서버 에러");
+                return res.json();
+            })
+            .then((data) => {
+                // 다음 페이지로 이동, state로 응답 전달
+                navigate("/RecommendPage", { state: { recommendations: data } });
+            })
+            .catch((err) => console.error(err));
+    }
 
     return (
         <Container>
@@ -194,17 +215,17 @@ function InsertPlacePage() {
             </Header>
             <InfoBox style={{ height: "176px" }}>
                 <InfoImage />
-                    <InfoText>
-                        <ConcertTitle>dfdfd</ConcertTitle>
-                        <InfoRow>
-                            <Location></Location>
-                            <InfoRowText>dfd</InfoRowText>
-                        </InfoRow>
-                        <InfoRow>
-                            <Calender></Calender>
-                            <InfoRowText>dfdfd</InfoRowText>
-                        </InfoRow>
-                        <ConcertContents>dfdfd</ConcertContents>
+                <InfoText>
+                    <ConcertTitle>dfdfd</ConcertTitle>
+                    <InfoRow>
+                        <Location></Location>
+                        <InfoRowText>dfd</InfoRowText>
+                    </InfoRow>
+                    <InfoRow>
+                        <Calender></Calender>
+                        <InfoRowText>dfdfd</InfoRowText>
+                    </InfoRow>
+                    <ConcertContents>dfdfd</ConcertContents>
                 </InfoText>
             </InfoBox>
             <MenuTitle>프로필 선택</MenuTitle>
@@ -242,7 +263,7 @@ function InsertPlacePage() {
                 style={{
                     width: "100%"
                 }}
-                // onClick={handleSubmit}
+                onClick={handleSubmit}
             >
                 Insert 추천
             </Button>
