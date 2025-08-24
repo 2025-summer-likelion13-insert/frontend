@@ -92,7 +92,7 @@ const navigate = useNavigate();
 
     useEffect(() => {
         // 로그인 상태 확인
-        fetch(`${process.env.REACT_APP_API_URL}/api/auth/me`, {
+        fetch("https://insert-back.duckdns.org/api/auth/me", {
             method: "GET",
             credentials: "include",
         })
