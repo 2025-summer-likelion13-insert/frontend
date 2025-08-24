@@ -12,7 +12,6 @@ import ReviewMainPage from './pages/Review/ReviewMainPage';
 import MyWishlistPage from './pages/MyPage/MyWishlistPage';
 import MyReviewPage from './pages/MyPage/MyReviewPage';
 import MyVisitSchedule from './pages/MyPage/MyVisitSchedule';
-
 import VisitSchedulePage from "./pages/VisitSchedulePage";
 import InformationPage from "./pages/InformationPage";
 import RecommendPage from "./pages/RecommendPage";
@@ -22,11 +21,8 @@ import NameSettingPage from './pages/Login/NameSettingPage'
 import WelcomePage from './pages/Login/WelcomePage';
 import ProfileSettingPage from './pages/ProfileSettingPage';
 
-
+function App() {
   return (
-
-    
-
     <BrowserRouter>
       <Routes>
         <Route path="/home" element={<Home />} />
@@ -41,7 +37,6 @@ import ProfileSettingPage from './pages/ProfileSettingPage';
         <Route path="/insertplace" element={<InsertPlacePage />} />
         <Route path="/visitschedule" element={<VisitSchedulePage />} />        
         <Route path="/mypage" element={<MyPage />} />
-
         <Route path="/" element={<LoginPage  />} />
         <Route path="/Recommendpage" element={<RecommendPage  />} />
         <Route path="/InsertPlacePage" element={<InsertPlacePage  />} />
@@ -49,11 +44,9 @@ import ProfileSettingPage from './pages/ProfileSettingPage';
         <Route path="/WelcomePage" element={<WelcomePage  />} />
         <Route path="/ProfileSettingPage" element={<ProfileSettingPage  />} />
         <Route path="/VisitSchedulePage" element={<VisitSchedulePage  />} />
-
       </Routes>
-      <TabNavigation />
+      {/* <TabNavigation /> */}
     </BrowserRouter>
-
   );
 };
 

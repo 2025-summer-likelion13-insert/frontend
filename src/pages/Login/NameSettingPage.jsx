@@ -137,7 +137,7 @@ function NameSettingPage() {
     localStorage.setItem("user_name", name);
 
     // 다음 페이지로 이동
-    navigate("/WelcomePage"); // 원하는 경로
+    navigate("/home"); // 원하는 경로
 };
 
     return (
