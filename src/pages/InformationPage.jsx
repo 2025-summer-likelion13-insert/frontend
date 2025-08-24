@@ -58,16 +58,14 @@ export default function InformationPage() {
         <ConcertVenue>{data.venueName}</ConcertVenue>
         <ConcertContents>{data.synopsis}</ConcertContents>
 
-        {/* 버튼 라벨을 두번째 디자인처럼 "Go"로, 동작은 유지 */}
         <Button
           variant="filled"
           size="small"
           style={{ width: "70px" }}
           onClick={() => {
-            console.log("externalId:", data.externalId); // 여기 찍힘
+            console.log("externalId:", data.externalId);
             navigate(`/insertplace/${data.externalId}`, { state: { concertData: data } });
-          }}
-        >
+          }}>
           Go
         </Button>
 
