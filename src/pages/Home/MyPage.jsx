@@ -1,11 +1,17 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { Icon } from '@iconify/react';
 import profileImg from '../../assets/profile.png';
 import colors from '../../styles/colors';
 import TabNavigation from '../../components/TabNavigation'; 
 
+import MyReview from '../../pages/MyPage/MyReviewPage';
+import MyVisit from '../../pages/MyPage/MyVisitSchedule';
+
 export default function MyPage() {
+  const navigate = useNavigate();
+
   return (
     <AppWrap>
     <Container>
@@ -22,11 +28,11 @@ export default function MyPage() {
       </ProfileBox>
 
       <IconRow>
-        <IconColumn>
+        <IconColumn onClick={() => navigate('/myvisit')}>
           <Icon icon="mynaui:heart" width="28" />
           <IconLabel>내 일정</IconLabel>
         </IconColumn>
-        <IconColumn>
+        <IconColumn onClick={() => navigate('/myreview')}>
           <Icon icon="mynaui:star" width="28" />
           <IconLabel>내 리뷰</IconLabel>
         </IconColumn>

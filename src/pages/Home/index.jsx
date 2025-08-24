@@ -1,5 +1,4 @@
-import React from "react";
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from 'react-router-dom';
 
 import TabNavigation from '../../components/TabNavigation';
@@ -241,7 +240,7 @@ useEffect(() => {
             key={ev.id || `s-${index}`}
             $isFirst={index === 0}
             /* $isLast={index === MOCK_EVENTS.length - 1}*/
-            onClick={() => navigate(`/information/${ev.id || 0}`)}
+            onClick={() => navigate(`/detail/${ev.id || 0}`)}
           >
             <Thumb src={ev.image} alt={parts.join('')} />
             <CardShade />

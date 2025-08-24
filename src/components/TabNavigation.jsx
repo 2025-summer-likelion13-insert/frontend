@@ -11,7 +11,7 @@ export default function TabNavigation({ onPersonClick }) {
 
   const tabs = [
     { icon: 'material-symbols:home', route: '/' },
-    { icon: 'majesticons:map-marker', route: '/map' },
+    { icon: 'majesticons:map-marker', route: '/visitschedule' },
     { icon: 'material-symbols:person', route: '/mypage' },
   ];
 

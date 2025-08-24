@@ -7,9 +7,13 @@ import DetailPage from './pages/Home/DetailPage';
 import MyPage from './pages/Home/MyPage';
 import SearchPage from './pages/Home/SearchPage';
 import ReviewWritePage from './pages/Review/ReviewWritePage';
+import ReviewMainPage from './pages/Review/ReviewMainPage';
 import MyWishlistPage from './pages/MyPage/MyWishlistPage';
 import MyReviewPage from './pages/MyPage/MyReviewPage';
+import MyVisitSchedule from './pages/MyPage/MyVisitSchedule';
 import InformationPage from './pages/InformationPage';
+import VisitSchedulePage from './pages/VisitSchedulePage';
+import InsertPlacePage from './pages/InsertPlacePage';
 
 function AppInner() {
   const location = useLocation();
@@ -20,12 +24,16 @@ function AppInner() {
     <>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/detail/:id" element={<DetailPage />} />
+        <Route path="/detail/:externalISd" element={<DetailPage />} />
         <Route path="/search" element={<SearchPage/>}/>
         <Route path="/review/write" element={<ReviewWritePage />} />
+        <Route path="/reviewmain" element={<ReviewMainPage />} />
         <Route path="/mywishlist" element={<MyWishlistPage />} />
         <Route path="/myreview" element={<MyReviewPage />} />
-        <Route path="/information" element={<InformationPage />} />
+        <Route path="/myvisit" element={<MyVisitSchedule />} />
+        <Route path="/information/:externalId" element={<InformationPage />} />
+        <Route path="/insertplace" element={<InsertPlacePage />} />
+        <Route path="/visitschedule" element={<VisitSchedulePage />} />        
         <Route path="/mypage" element={<MyPage />} />
       </Routes>
 

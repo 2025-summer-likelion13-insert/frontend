@@ -68,6 +68,13 @@ export default function ReviewWritePage() {
     setImage(url); // 임시로 미리보기용 URL
   };
 
+      const fmtDate = (d = new Date()) => {
+    const y = d.getFullYear();
+    const m = d.getMonth() + 1;
+    const day = d.getDate();
+    return `${y}년 ${m}월 ${day}일`;
+  };
+
   return (
     <Container>
       <TopBar>
@@ -90,7 +97,7 @@ export default function ReviewWritePage() {
 
         <DateText>
           <Icon className="cal-ic" icon="mynaui:calendar" />
-          <span>2025년 8월 16일 방문</span>
+          <span>{fmtDate()} 방문</span>
         </DateText>
 
 <TextAreaWrap onClick={() => textareaRef.current?.focus()}>

@@ -1,11 +1,82 @@
 // src/pages/MyPage/MyReviewPage.jsx
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { Icon } from "@iconify/react";
 import colors from "../../styles/colors";
+import { Loader, Map, MapMarker } from "react-kakao-maps-sdk";
+import profileImg from '../../assets/profile.png';
 
 const API_BASE = process.env.REACT_APP_API_BASE;
 
+export default function MyReviewPage() {
+  const navigate = useNavigate(); 
+  const [items, setItems] = useState([]);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/reviews?userId=1`);
+        const json = await res.json();
+        setItems(json?.data ?? []);
+      } catch (e) {
+        console.error(e);
+        setItems([]);
+      }
+    };
+    load();
+  }, []);
+
+  return (
+    <Container>
+      <Header>
+        <BackButton icon="mingcute:arrow-left-line" onClick={() => window.history.back()} />
+        <span>내 리뷰 화면</span>
+      </Header>
+
+      <ProfileSection>
+        <ProfileImage src={profileImg} alt="profile" />
+        <ProfileName>크리스티아누 호날두</ProfileName>
+      </ProfileSection>
+
+      <TabBar>
+        <Tab onClick={() => navigate("/myvisit")}>내 일정</Tab>
+        <Tab active onClick={() => navigate("/myreview")}>리뷰</Tab>
+      </TabBar>
+
+      {items.map((review) => (
+        <ReviewCard key={review.id}>
+          <ReviewHeader>
+            <ReviewTitle>{review.placeName || "리뷰"}</ReviewTitle>
+            <Rating>
+              {"★★★★★☆☆☆☆☆".slice(5 - Math.min(5, review.rating || 0), 10 - Math.min(5, review.rating || 0))}
+              <span>{review.rating ?? 0}.0</span>
+            </Rating>
+          </ReviewHeader>
+
+          {review.mediaUrls?.[0] && (
+            <ReviewImage src={review.mediaUrls[0]} alt="리뷰 이미지" />
+          )}
+
+          <Meta>
+            {review.placeCategory && <span>{review.placeCategory}</span>}
+            {(review.placeCategory && review.placeAddress) && <Dot />}
+            {review.placeAddress && <span>{review.placeAddress}</span>}
+            {(review.placeAddress || review.placeCategory) && <Dot />}
+            <span>{(review.createdAt || "").slice(0, 10)}</span>
+          </Meta>
+
+          <ReviewContent>{review.content}</ReviewContent>
+
+          <ReviewFooter>
+            <Icon icon="mdi:thumb-up-outline" /> {review.likes ?? 0}
+            <Icon icon="mdi:comment-outline" /> {review.comments ?? 0}
+          </ReviewFooter>
+        </ReviewCard>
+      ))}
+    </Container>
+  );
+}
 const Container = styled.div`
   max-width: 600px;
   min-width: 360px;
@@ -96,7 +167,8 @@ const ReviewImage = styled.img`
 const ReviewContent = styled.div`
   font-size: 14px;
   color: #333;
-  margin-bottom: 12px;
+  margin-bottom: 5px;
+  margin-top: 7px;
 `;
 
 const Meta = styled.div`
@@ -113,72 +185,5 @@ const ReviewFooter = styled.div`
   gap: 12px;
   font-size: 14px;
   color: #666;
+  margin-top: 7px;
 `;
-
-export default function MyReviewPage() {
-  const [items, setItems] = useState([]);
-
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const res = await fetch(`${API_BASE}/api/reviews?userId=1`);
-        const json = await res.json();
-        setItems(json?.data ?? []);
-      } catch (e) {
-        console.error(e);
-        setItems([]);
-      }
-    };
-    load();
-  }, []);
-
-  return (
-    <Container>
-      <Header>
-        <BackButton icon="mingcute:arrow-left-line" onClick={() => window.history.back()} />
-        <span>내 리뷰 화면</span>
-      </Header>
-
-      <ProfileSection>
-        <ProfileImage src="/uploads/profile.png" alt="프로필" />
-        <ProfileName>크리스티아누 호날두</ProfileName>
-      </ProfileSection>
-
-      <TabBar>
-        <Tab>내 일정</Tab>
-        <Tab active>리뷰</Tab>
-      </TabBar>
-
-      {items.map((review) => (
-        <ReviewCard key={review.id}>
-          <ReviewHeader>
-            <ReviewTitle>{review.placeName || "리뷰"}</ReviewTitle>
-            <Rating>
-              {"★★★★★☆☆☆☆☆".slice(5 - Math.min(5, review.rating || 0), 10 - Math.min(5, review.rating || 0))}
-              <span>{review.rating ?? 0}.0</span>
-            </Rating>
-          </ReviewHeader>
-
-          {review.mediaUrls?.[0] && (
-            <ReviewImage src={review.mediaUrls[0]} alt="리뷰 이미지" />
-          )}
-
-          <ReviewContent>{review.content}</ReviewContent>
-
-          <Meta>
-            {review.placeCategory && <span>{review.placeCategory}</span>}
-            {(review.placeCategory && review.placeAddress) && <Dot />}
-            {review.placeAddress && <span>{review.placeAddress}</span>}
-            {(review.placeAddress || review.placeCategory) && <Dot />}
-            <span>{(review.createdAt || "").slice(0, 10)}</span>
-          </Meta>
-
-          <ReviewFooter>
-            <Icon icon="mdi:thumb-up-outline" /> {review.likes ?? 0}
-            <Icon icon="mdi:comment-outline" /> {review.comments ?? 0}
-          </ReviewFooter>
-        </ReviewCard>
-      ))}
-    </Container>
-  );
-}

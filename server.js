@@ -1,6 +1,6 @@
 // server.js
 // ──────────────────────────────────────────────────────────────
-// 개발용 Mock API (Express) - 단일 파일 전체 코드
+// 개발용 Mock API (Express) - 단일 파일 전체 코드 (정상 버전)
 // ──────────────────────────────────────────────────────────────
 const express = require('express');
 const cors = require('cors');
@@ -35,7 +35,7 @@ const upload = multer({ storage });
 // ──────────────────────────────────────────────────────────────
 const db = {
   performsTop10: [
-    { mt20id: 'A1', prfnm: '테스트 콘서트', poster: 'https://picsum.photos/seed/A1/400/600' },
+    { mt20id: 'A1', prfnm: '테스트 콘서트',    poster: 'https://picsum.photos/seed/A1/400/600' },
     { mt20id: 'A2', prfnm: '여름 공연 페스티벌', poster: 'https://picsum.photos/seed/A2/400/600' },
   ],
   performsUpcoming: [
@@ -45,7 +45,6 @@ const db = {
     { mt20id: 'S1', prfnm: '여름 축제', poster: 'https://picsum.photos/seed/S1/400/600' },
   ],
   reviews: [
-    // 예시 1건 (없어도 됨)
     {
       id: 1,
       userId: 1,
@@ -117,10 +116,6 @@ app.get('/api/festivals/summer', (_req, res) => res.json(db.festivalsSummer));
 
 // ──────────────────────────────────────────────────────────────
 // ② 찜(좋아요) API — 일원화
-//    목록: GET  /api/likes/perform/me?page=0&size=20
-//    단건: GET  /api/likes/perform/:externalId
-//    토글: POST /api/likes/perform/:externalId   (PUT도 하위호환 지원)
-//    삭제: DELETE /api/likes/perform/:externalId
 // ──────────────────────────────────────────────────────────────
 app.get('/api/likes/perform/me', requireUserDev, (req, res) => {
   const page = parseInt(req.query.page ?? '0', 10);
@@ -165,14 +160,7 @@ app.delete('/api/likes/perform/:externalId', requireUserDev, (req, res) => {
 
 // ──────────────────────────────────────────────────────────────
 // ③ 리뷰 API
-//   - POST   /api/reviews               : 리뷰 생성(ReviewWritePage)
-//   - GET    /api/reviews?userId=1      : 내 리뷰 목록(MyReviewPage)
-//   - GET    /api/reviews/:reviewId     : 단건 조회(사진 양식 스펙)
 // ──────────────────────────────────────────────────────────────
-
-// 리뷰 생성 (ReviewWritePage에서 사용)
-// 요청 body 예시:
-// { userId, placeId, scheduleId, rating, content, mediaUrls:[], isVisited:true }
 app.post('/api/reviews', (req, res) => {
   try {
     const {
@@ -189,7 +177,7 @@ app.post('/api/reviews', (req, res) => {
       return res.status(400).json({ success: false, message: '필수 값 누락' });
     }
 
-    const now = new Date().toISOString().slice(0, 19); // YYYY-MM-DDTHH:mm:ss
+    const now = new Date().toISOString().slice(0, 19);
     const placeRef = places[placeId] || { name: '알수없음', category: 'UNKNOWN', address: '' };
 
     const newReview = {
@@ -199,7 +187,7 @@ app.post('/api/reviews', (req, res) => {
       scheduleId,
       rating,
       content: content ?? '',
-      mediaUrls,         // 클라이언트에서 URL을 넘기면 그대로 저장
+      mediaUrls,
       isVisited,
       createdAt: now,
       updatedAt: now,
@@ -209,8 +197,6 @@ app.post('/api/reviews', (req, res) => {
     };
 
     db.reviews.unshift(newReview);
-
-    // ReviewWritePage 요구사항: 생성 결과에 id가 있어야 함
     return res.status(201).json({ success: true, id: newReview.id, message: '리뷰가 생성되었습니다.' });
   } catch (e) {
     console.error(e);
@@ -218,7 +204,7 @@ app.post('/api/reviews', (req, res) => {
   }
 });
 
-// 내 리뷰 목록 (MyReviewPage에서 사용)
+// 내 리뷰 목록
 app.get('/api/reviews', (req, res) => {
   const userId = Number(req.query.userId);
   const list = Number.isFinite(userId) ? db.reviews.filter(r => r.userId === userId) : db.reviews;
@@ -229,7 +215,7 @@ app.get('/api/reviews', (req, res) => {
   });
 });
 
-// 사진 양식 스펙에 맞는 단건 조회 (Notion 스펙)
+// 사진 양식 스펙에 맞는 단건 조회
 app.get('/api/reviews/:reviewId', (req, res) => {
   const id = Number(req.params.reviewId);
   const found = db.reviews.find(r => r.id === id);
@@ -241,6 +227,31 @@ app.get('/api/reviews/:reviewId', (req, res) => {
     data: found,
     message: '리뷰를 성공적으로 조회했습니다.',
   });
+});
+
+// ──────────────────────────────────────────────
+// ⑤ 공연 상세조회 API (InformationPage에서 사용)
+// GET /api/performs/by-external/:externalId
+// ──────────────────────────────────────────────
+app.get('/api/performs/by-external/:externalId', (req, res) => {
+  const { externalId } = req.params;
+  const all = [...db.performsTop10, ...db.performsUpcoming, ...db.festivalsSummer];
+
+  const found = all.find(p => String(p.mt20id) === String(externalId));
+  if (!found) {
+    return res.status(404).json({ success: false, message: '공연을 찾을 수 없습니다.' });
+  }
+
+  const payload = {
+    externalId: found.mt20id,
+    title: found.prfnm,
+    startDate: found.startDate ?? '2025-08-30',
+    endDate:   found.endDate   ?? '2025-08-31',
+    venueName: found.venueName ?? '테스트홀',
+    synopsis:  found.synopsis  ?? '테스트 공연 상세 설명입니다.',
+    posterUrl: found.poster,
+  };
+  return res.json(payload);
 });
 
 // ──────────────────────────────────────────────────────────────
