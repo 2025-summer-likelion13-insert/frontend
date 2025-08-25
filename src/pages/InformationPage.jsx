@@ -17,6 +17,20 @@ export default function InformationPage() {
   const [err, setErr] = useState("");
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
+  const [userId, setUserId] = useState(null);
+
+    // 로그인 유저 정보 가져오기
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const userData = await api("/api/auth/me"); // api() 사용
+        setUserId(userData.id);
+      } catch (err) {
+        console.error("유저 정보 불러오기 실패:", err);
+      }
+    };
+    fetchUser();
+  }, []);
 
   useEffect(() => {
     if (!externalId) {
@@ -40,6 +54,11 @@ export default function InformationPage() {
 
     load();
   }, [externalId]);
+
+  if (loading) return <Center>불러오는 중…</Center>;
+  if (err) return <Center>{err}</Center>;
+  if (!data) return <Center>데이터가 없습니다.</Center>;
+
 
   useEffect(() => {
     console.log("Current data state:", data);
@@ -66,6 +85,42 @@ export default function InformationPage() {
     }
   };
 
+const handleGoClick = async () => {
+    if (!userId) {
+      alert("로그인 정보를 불러오는 중입니다. 잠시만 기다려주세요.");
+      return;
+    }
+
+    try {
+      const eventBody = {
+        name: data.title,
+        description: data.synopsis || "",
+        eventDate: data.startDate || new Date().toISOString(),
+        venueName: data.venueName,
+        venueAddress: data.venueAddress || "",
+        venueLatitude: data.venueLatitude || 37.4563,
+        venueLongitude: data.venueLongitude || 126.7052,
+        category: "FOOD",
+        userId: userId, // 로그인 유저 ID
+        externalId: data.externalId,
+      };
+
+      const createdEvent = await api("/api/events", {
+        method: "POST",
+        body: eventBody,
+      });
+
+      console.log("생성된 이벤트:", createdEvent);
+
+      navigate(`/insertplace/${data.externalId}`, {
+        state: { concertData: data, eventId: createdEvent.id },
+      });
+    } catch (err) {
+      console.error("이벤트 생성 실패:", err);
+      alert("이벤트 생성에 실패했습니다.");
+    }
+  };
+
   return (
     <Container>
       <ConcertImage $bg={data.posterUrl} />
@@ -79,22 +134,7 @@ export default function InformationPage() {
           size="small"
           style={{ width: "70px" }}
           type="button"
-          onClick={() => {
-            // externalId가 있는지 확인
-            if (!data || !data.externalId) {
-              alert("externalId가 없습니다. 이동할 수 없습니다.");
-              return;
-            }
-
-            // 버튼 클릭 시 navigate
-            navigate(`/insertplace/${data.externalId}`, {
-              state: { concertData: data },
-            });
-          }}
-        >
-          Go
-        </Button>
-
+          onClick={handleGoClick}>Go</Button>
         <MenuList>
           <Menu>
             <StarIcon onClick={handleLike}/>
