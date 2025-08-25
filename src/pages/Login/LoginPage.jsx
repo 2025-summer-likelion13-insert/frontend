@@ -1,4 +1,5 @@
-import { styled } from "styled-components";
+//import { styled } from "styled-components";
+import styled from "styled-components";
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import Button from "../../components/Button";
@@ -41,7 +42,7 @@ const ButtonWrapper = styled.div`
 display: flex;
 justify-content: center;
 position: absolute;
-top: 70%; // 타이틀보다 아래
+top: 70%; /* 타이틀보다 아래*/
 left: 50%;
 transform: translateX(-50%); `;
 
@@ -92,7 +93,8 @@ const navigate = useNavigate();
 
     useEffect(() => {
         // 로그인 상태 확인
-        fetch("https://insert-back.duckdns.org/api/auth/me", {
+        //fetch("https://insert-back.duckdns.org/api/auth/me", {
+        fetch(`${API_BASE}/api/auth/me`, {
             method: "GET",
             credentials: "include",
         })

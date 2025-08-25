@@ -20,6 +20,7 @@ import LoginPage from './pages/Login/LoginPage';
 import NameSettingPage from './pages/Login/NameSettingPage'
 import WelcomePage from './pages/Login/WelcomePage';
 import ProfileSettingPage from './pages/ProfileSettingPage';
+import OAuthCallback from "./pages/Auth/OAuthCallback";
 
 function App() {
   return (
@@ -43,6 +44,7 @@ function App() {
         <Route path="/WelcomePage" element={<WelcomePage  />} />
         <Route path="/ProfileSettingPage" element={<ProfileSettingPage  />} />
         <Route path="/VisitSchedulePage" element={<VisitSchedulePage  />} />
+        <Route path="/oauth/callback" element={<OAuthCallback />} />
       </Routes>
       {/* <TabNavigation /> */}
     </BrowserRouter>
