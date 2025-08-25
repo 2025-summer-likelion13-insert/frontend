@@ -10,9 +10,9 @@ import { ReactComponent as Bus } from "../assets/icons/bus.svg";
 import { ReactComponent as Car } from "../assets/icons/car.svg";
 import { ReactComponent as Subway } from "../assets/icons/subway.svg";
 import { ReactComponent as Walk } from "../assets/icons/walk.svg";
-import { useNavigate } from "react-router-dom";
-import { useLocation } from "react-router-dom";
+import { useLocation, useEffect, useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
+import {api} from "../lib/api"
 
 import MenuItem from "../components/MenuToggle";
 import { useState } from "react";
@@ -232,7 +232,7 @@ function InsertPlacePage() {
     if (loading) return <Container>불러오는 중…</Container>;
     if (error) return <Container>{error}</Container>;
     if (!concertData) return <Container>데이터가 없습니다.</Container>;
-    
+
     return (
         <Container>
             <Header>

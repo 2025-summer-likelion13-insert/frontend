@@ -27,7 +27,6 @@ export default function InformationPage() {
       try {
         setLoading(true);
         const data = await api(`/api/performs/by-external/${externalId}`);
-        console.log("API response:", response); // 여기서 data 상태 확인
         setData(data);
       } catch (e) {
         console.error(e);

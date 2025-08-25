@@ -87,6 +87,15 @@ const fetchSearchResults = async (q) => {
     </Container>
   );
 }
+
+const imgUrl = (src) => {
+  if (!src) return "";
+  if (/^https?:\/\//i.test(src)) return src;
+  // 앞에 슬래시가 없어도 안전하게 붙여줌
+  const path = src.startsWith("/") ? src : `/${src}`;
+  return `${API_BASE}${path}`;
+};
+
 const Container = styled.div`
   max-width: 600px;
   margin: 0 auto;
