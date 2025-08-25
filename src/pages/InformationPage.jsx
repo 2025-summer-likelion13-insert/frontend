@@ -6,7 +6,7 @@ import { ReactComponent as StarIcon } from "../assets/icons/star.svg";
 import { ReactComponent as FavariteIcon } from "../assets/icons/favorite.svg";
 import { ReactComponent as ShareIcon } from "../assets/icons/share.svg";
 import { useParams, useNavigate } from "react-router-dom";
-import { api } from "../../lib/api";
+import { api } from "../lib/api";
 
 // 상세 페이지(사진 포함) 조회 컴포넌트
 export default function InformationPage() {
