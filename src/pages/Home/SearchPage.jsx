@@ -29,7 +29,8 @@ const fetchSearchResults = async (q) => {
     if (!q?.trim()) return setResults([]);
     const qs = new URLSearchParams({ q: q.trim(), limit: '50' });
     const url = `${API_BASE}/api/performs/fixed/search?${qs}`; // ← 절대 URL
-    const data = await api(url);
+    //const data = await api(url);
+    const data = await api(`${API_BASE}/api/performs/fixed/search?${qs}`);
     setResults(Array.isArray(data) ? data : []);
   } catch (e) {
     console.error('검색 실패:', e);

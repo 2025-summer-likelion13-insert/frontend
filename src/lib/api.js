@@ -1,4 +1,5 @@
 // src/lib/api.js
+/*
 const guessBase =
   (typeof window !== "undefined" && window.location.hostname !== "localhost")
     ? "https://insert-back.duckdns.org"
@@ -39,7 +40,7 @@ export async function api(path, opts = {}) {
 
 if (typeof window !== "undefined") console.log("[API_BASE]", API_BASE);
 */
-
+/*
 // src/lib/api.js
 export const API_BASE =
   process.env.REACT_APP_API_BASE || "https://insert-back.duckdns.org";
@@ -62,6 +63,22 @@ export async function api(path, opts = {}) {
     const text = await res.text();
     throw new Error(`HTTP ${res.status} ${res.statusText} - ${text.slice(0,120)}`);
   }
+  const ct = res.headers.get("content-type") || "";
+  return ct.includes("application/json") ? res.json() : res.text();
+}
+*/
+export const API_BASE = process.env.REACT_APP_API_BASE || "https://insert-back.duckdns.org";
+
+export async function api(path, opts = {}) {
+  const url = /^https?:\/\//.test(path) ? path : `${API_BASE}${path.startsWith('/')?'':'/'}${path}`;
+  const token = localStorage.getItem("token");
+  const headers = {
+    "Content-Type": "application/json",
+    ...(opts.headers || {}),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+  const res = await fetch(url, { credentials: "include", ...opts, headers });
+  if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
   const ct = res.headers.get("content-type") || "";
   return ct.includes("application/json") ? res.json() : res.text();
 }

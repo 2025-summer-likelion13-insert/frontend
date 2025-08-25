@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 import TabNavigation from '../../components/TabNavigation';
 import ReviewPopup from '../../pages/Home/ReviewPopup';
+import MyReviewPage from "../MyPage/MyReviewPage";
 
 import styled, { createGlobalStyle } from "styled-components";
 import colors from '../../styles/colors';
@@ -90,6 +91,13 @@ const normalize = (arr=[]) => arr.map((it,i)=>({
     }
   };
 
+  const goHeroDetail = () => {
+  // heroItem에서 externalId(우선) → id 순으로 사용
+  const id = heroItem?.externalId || heroItem?.id;
+  if (!id) { alert('상세 정보를 찾을 수 없어요.'); return; }
+  navigate(`/information/${id}`);
+};
+
 // 2) 찜 토글
 /*
 const toggleLike = async (externalId) => {
@@ -160,7 +168,7 @@ useEffect(() => {
 
       <IconButton
         aria-label="search"
-        onClick={() => navigate('/search')} // ✅ 클릭 시 이동
+        onClick={() => navigate('/search')} 
       >
         <Icon
           icon="mingcute:search-line"
@@ -180,11 +188,11 @@ useEffect(() => {
           <HeroContent>
             <HeroTitle>{h1}{h2 && <><br />{h2}</>}</HeroTitle>
             <HeroActions>
-              <Button variant="filled" size="medium">
+              <Button variant="filled" size="medium" onClick={goHeroDetail}>
                 <Icon icon="mdi-light:check" width="24" height="24" style={{ color: '#FFFFFF' }} />
                 선택하기
               </Button>
-              <WhiteButton variant="filled">
+              <WhiteButton variant="filled" onClick={()=>navigate('/myreview')}>
                 <Icon icon="mdi-light:plus" width="24" height="24" style={{ color: '#000' }} />
                 내가 찜한 리스트
               </WhiteButton>
