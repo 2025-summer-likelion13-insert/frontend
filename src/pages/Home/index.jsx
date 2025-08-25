@@ -110,22 +110,29 @@ const toggleLike = async (externalId) => {
   } catch (e) { console.error(e); alert('찜하기 실패'); }
 };
 */
-  const toggleLike = async (externalId) => {
-    if (!externalId) {
-      alert('이 항목은 외부 ID가 없어 찜하기를 지원하지 않습니다.');
-      return;
-    }
-    try {
-      const data = await api(`/api/likes/perform/${externalId}`, { method: 'PUT' });
-      setLikes((prev) => ({
-        ...prev,
-        [externalId]: { liked: data.liked, likeCount: data.likeCount },
-      }));
-    } catch (e) {
-      console.error(e);
-      alert('찜하기 실패');
-    }
-  };
+const toggleLike = async (externalId) => {
+  if (!externalId) return alert("외부 ID가 없어 찜하기를 지원하지 않습니다.");
+  try {
+    const data = await api(`/api/likes/perform/${encodeURIComponent(externalId)}`, {
+      method: "PUT",
+      body: JSON.stringify({}),  // ← 일부 서버에서 필수
+    });
+    setLikes((prev) => ({
+      ...prev,
+      [externalId]: {
+        liked: !!data?.liked,
+        likeCount:
+          typeof data?.likeCount === "number"
+            ? data.likeCount
+            : prev[externalId]?.likeCount ?? 0,
+      },
+    }));
+  } catch (e) {
+    console.error("찜하기 실패:", e);
+    alert(`찜하기 실패: ${e.message || e}`);
+  }
+};
+
 
 /** 최초 1회 조회 */
 useEffect(() => {
