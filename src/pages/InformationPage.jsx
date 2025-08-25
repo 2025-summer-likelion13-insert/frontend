@@ -84,14 +84,15 @@ const handleGoClick = async () => {
 
   try {
     const eventBody = {
-      name: data.venueName,
-      eventDate: data.startDate || new Date().toISOString(),
+      name: data.venueName || "이벤트 이름 미정", // 필수값
+       eventDate: data.startDate
+        ? new Date(data.startDate).toISOString()
+        : new Date().toISOString(),
       venueName: data.venueName,
       venueAddress: data.venueAddress || "",
-      venueLatitude: 37.498095,
-      venueLongitude: 127.027610,
+      venueLatitude: data.venueLatitude || 0, // 좌표 없으면 기본값
+      venueLongitude: data.venueLongitude || 0,
       userId: userId, // 로그인 유저 ID
-      externalId: data.externalId,
     };
 
       const createdEvent = await api("/api/events", {
