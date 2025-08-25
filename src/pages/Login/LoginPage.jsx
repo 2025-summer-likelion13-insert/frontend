@@ -6,6 +6,7 @@ import Button from "../../components/Button";
 import { ReactComponent as GoogleIcon } from "../../assets/icons/google.svg"
 import { ReactComponent as Character } from "../../assets/icons/character.svg"
 import { useNavigate } from "react-router-dom";
+import { API_BASE } from '../../lib/api';
 
 const Container = styled.div`
 max-width: 600px; min-width: 360px; margin: 0 auto; 

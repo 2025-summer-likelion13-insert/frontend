@@ -43,6 +43,7 @@ const fetchSearchResults = async (q) => {
 
 const goDetail = (item) => {
   const id = item?.externalId || item?.id;
+   console.log('[goDetail]', id, item);
   if (!id) { alert('상세 정보를 찾을 수 없어요.'); return; }
   console.log('[click]',id);
   navigate(`/information/${encodeURIComponent(id)}`);
@@ -92,9 +93,9 @@ const handleKeyDown = (e) => {
 
       {/* 검색 결과 출력 */}
       <ResultList>
-        {results.map((item) => (
+        {results.map((item, idx) => (
           <ResultItem
-          key={item.externalId || item.id || idx}
+          key={item.externalId || item.id || `r-${idx}`}
           role="button"
           tabIndex={0}
           aria-label={`${item.title} 상세보기`}
@@ -191,6 +192,10 @@ const ResultItem = styled.li`
   cursor: pointer;
   padding: 6px 4px;
   border-radius: 8px;
+   border: 0;
+   background: transparent;
+   width: 100%;
+   text-align: left;
   &:hover { background: #f7f7f7; }
   &:focus { outline: 2px solid #DF3B1E33; }
 `;
