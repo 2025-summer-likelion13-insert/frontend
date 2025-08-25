@@ -60,7 +60,6 @@ export default function InformationPage() {
         <ConcertSchedule>{dateRange}</ConcertSchedule>
         <ConcertVenue>{data.venueName}</ConcertVenue>
         <ConcertContents>{data.synopsis}</ConcertContents>
-        <div>Debug externalId: {data?.externalId}</div>
         <Button
           variant="filled"
           size="small"
