@@ -41,6 +41,12 @@ const fetchSearchResults = async (q) => {
   }
 };
 
+const goDetail = (item) => {
+  const id = item?.externalId || item?.id;
+  if (!id) { alert('상세 정보를 찾을 수 없어요.'); return; }
+  navigate(`/information/${encodeURIComponent(id)}`);
+};
+
   useEffect(() => {
     const q = (searchParams.get('q') || '').trim();
     if (q) { fetchSearchResults(q); }
@@ -86,7 +92,19 @@ const handleKeyDown = (e) => {
       {/* 검색 결과 출력 */}
       <ResultList>
         {results.map((item) => (
-          <ResultItem key={item.externalId}>
+          <ResultItem
+          key={item.externalId || item.id || idx}
+          role="button"
+          tabIndex={0}
+          aria-label={`${item.title} 상세보기`}
+          onClick={() => goDetail(item)}
+          onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          goDetail(item);
+          }
+        }}
+      >
              <Poster
                 src={imgUrl(item.posterUrl)}
                 alt={item.title}
@@ -167,6 +185,11 @@ const ResultItem = styled.li`
   align-items: center;
   gap: 12px;
   margin-bottom: 16px;
+  cursor: pointer;
+  padding: 6px 4px;
+  border-radius: 8px;
+  &:hover { background: #f7f7f7; }
+  &:focus { outline: 2px solid #DF3B1E33; }
 `;
 
 const Poster = styled.img`
