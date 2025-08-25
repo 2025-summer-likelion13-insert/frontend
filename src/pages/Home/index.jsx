@@ -147,7 +147,7 @@ useEffect(() => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowPopup(true);
-    }, 5000); // 5초 후 팝업 표시
+    }, 50000000000); // 5초 후 팝업 표시
     return () => clearTimeout(timer);
   }, []);
 
