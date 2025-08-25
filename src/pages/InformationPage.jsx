@@ -84,14 +84,9 @@ const handleGoClick = async () => {
 
     try {
       const eventBody = {
-        name: data.title,
-        description: data.synopsis || "",
         eventDate: data.startDate || new Date().toISOString(),
         venueName: data.venueName,
         venueAddress: data.venueAddress || "",
-        venueLatitude: data.venueLatitude || 37.4563,
-        venueLongitude: data.venueLongitude || 126.7052,
-        category: "FOOD",
         userId: userId, // 로그인 유저 ID
         externalId: data.externalId,
       };
