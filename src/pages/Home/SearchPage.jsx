@@ -6,7 +6,8 @@ import { api, API_BASE } from '../../lib/api';
 
 export default function SearchPage() {
   const navigate = useNavigate();
-  const [query, setQuery] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [query, setQuery] = useState(searchParams.get('q') || '');
   const [results, setResults] = useState([]);
 
   // 검색 API 호출
@@ -32,11 +33,20 @@ const fetchSearchResults = async (q) => {
     //const data = await api(url);
     const data = await api(`${API_BASE}/api/performs/fixed/search?${qs}`);
     setResults(Array.isArray(data) ? data : []);
+    console.log('[SearchPage] API_BASE =', API_BASE);
+
   } catch (e) {
     console.error('검색 실패:', e);
     setResults([]);
   }
 };
+
+  useEffect(() => {
+    const q = (searchParams.get('q') || '').trim();
+    if (q) { fetchSearchResults(q); }
+    else { setResults([]); }
+  }, [searchParams]); // URL ?q= 변경될 때마다 검색 실행
+
 /*
   const handleSearch = () => {
   if (query.trim()) {
@@ -45,11 +55,12 @@ const fetchSearchResults = async (q) => {
 };
 */
 
-   const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
-      if (query.trim()) navigate(`/search?q=${encodeURIComponent(query.trim())}`);
-    }
-   };
+const handleKeyDown = (e) => {
+  if (e.key === 'Enter') {
+    const q = query.trim();
+    setSearchParams(q ? { q } : {}); // URL 갱신 → useEffect에서 fetch 실행
+  }
+};
 
   return (
     <Container>
@@ -76,11 +87,11 @@ const fetchSearchResults = async (q) => {
       <ResultList>
         {results.map((item) => (
           <ResultItem key={item.externalId}>
-             <Poster>
+             <Poster
                 src={imgUrl(item.posterUrl)}
                 alt={item.title}
                 onError={(e)=>{ e.currentTarget.src = '/default.jpg'; }}
-            </Poster>
+            />
             <Title>{item.title}</Title>
           </ResultItem>
         ))}
