@@ -82,14 +82,17 @@ const handleGoClick = async () => {
       return;
     }
 
-    try {
-      const eventBody = {
-        eventDate: data.startDate || new Date().toISOString(),
-        venueName: data.venueName,
-        venueAddress: data.venueAddress || "",
-        userId: userId, // 로그인 유저 ID
-        externalId: data.externalId,
-      };
+  try {
+    const eventBody = {
+      name: data.venueName,
+      eventDate: data.startDate || new Date().toISOString(),
+      venueName: data.venueName,
+      venueAddress: data.venueAddress || "",
+      venueLatitude: 37.498095,
+      venueLongitude: 127.027610,
+      userId: userId, // 로그인 유저 ID
+      externalId: data.externalId,
+    };
 
       const createdEvent = await api("/api/events", {
         method: "POST",
