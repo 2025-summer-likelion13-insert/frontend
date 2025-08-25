@@ -85,7 +85,7 @@ const handleGoClick = async () => {
   try {
     const eventBody = {
       name: data.venueName || "이벤트 이름 미정", // 필수값
-       eventDate: data.startDate
+      eventDate: data.startDate
         ? new Date(data.startDate).toISOString()
         : new Date().toISOString(),
       venueName: data.venueName,
@@ -93,12 +93,13 @@ const handleGoClick = async () => {
       venueLatitude: data.venueLatitude || 0, // 좌표 없으면 기본값
       venueLongitude: data.venueLongitude || 0,
       userId: userId, // 로그인 유저 ID
+      externalId: data.externalId
     };
 
-      const createdEvent = await api("/api/events", {
-        method: "POST",
-        body: eventBody,
-      });
+    const createdEvent = await api("/api/events", {
+      method: "POST",
+      body: eventBody,
+    });
 
       console.log("생성된 이벤트:", createdEvent);
 
