@@ -56,7 +56,7 @@ padding: 18px;
 margin: 0 auto;
 width: 100%;
 box-sizing: border-box;
-background-image: ${p => (p.$bg ? 'url("' + p.$bg + '")' : "none")};
+background-image: #fff;
 margin-bottom: 36px;
 gap: 16px; /* 이미지와 텍스트 사이 간격 */
 display: flex;
@@ -244,7 +244,7 @@ function InsertPlacePage() {
                 <PageTitle>Insert 플레이스</PageTitle>
             </Header>
             <InfoBox style={{ height: "176px" }}>
-                <InfoImage $bg={concertData.posterUrl} />
+                <InfoImage src={concertData.posterUrl} alt={concertData.title} />
                 <InfoText>
                     <ConcertTitle>{concertData.title}</ConcertTitle>
                     <InfoRow>
