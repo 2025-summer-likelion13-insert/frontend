@@ -10,7 +10,8 @@ import { ReactComponent as Bus } from "../assets/icons/bus.svg";
 import { ReactComponent as Car } from "../assets/icons/car.svg";
 import { ReactComponent as Subway } from "../assets/icons/subway.svg";
 import { ReactComponent as Walk } from "../assets/icons/walk.svg";
-import { useLocation, useEffect, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import {api} from "../lib/api"
 
