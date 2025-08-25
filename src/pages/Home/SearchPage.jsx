@@ -71,7 +71,7 @@ const handleKeyDown = (e) => {
 };
 
   return (
-    <Container>
+    <Container  onClickCapture={(e)=>console.log('[capture]', e.target)}>
       <TopBar>
         <BackIcon
           icon="fluent:ios-arrow-24-regular"
