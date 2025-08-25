@@ -15,6 +15,8 @@ export default function InformationPage() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
+  const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
 
   useEffect(() => {
     if (!externalId) {
@@ -52,6 +54,18 @@ export default function InformationPage() {
       ? `${data.startDate} ~ ${data.endDate}`
       : data.startDate || "";
 
+  const handleLike = async () => {
+    try {
+      const data = await api(`/api/likes/perform/${externalId}`, {
+        method: "PUT",
+      });
+      setLiked(data.liked);
+      setLikeCount(data.likeCount);
+    } catch (err) {
+      console.error("찜하기 실패:", err);
+    }
+  };
+
   return (
     <Container>
       <ConcertImage $bg={data.posterUrl} />
@@ -83,7 +97,7 @@ export default function InformationPage() {
 
         <MenuList>
           <Menu>
-            <StarIcon />
+            <StarIcon onClick={handleLike}/>
             내가 찜한 리스트
           </Menu>
           <Menu>
