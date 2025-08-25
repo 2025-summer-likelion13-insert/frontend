@@ -59,15 +59,6 @@ export default function InformationPage() {
   if (err) return <Center>{err}</Center>;
   if (!data) return <Center>데이터가 없습니다.</Center>;
 
-
-  useEffect(() => {
-    console.log("Current data state:", data);
-  }, [data]);
-
-  if (loading) return <Center>불러오는 중…</Center>;
-  if (err) return <Center>{err}</Center>;
-  if (!data) return <Center>데이터가 없습니다.</Center>;
-
   const dateRange =
     data.startDate && data.endDate
       ? `${data.startDate} ~ ${data.endDate}`
