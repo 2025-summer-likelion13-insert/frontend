@@ -113,6 +113,8 @@ const toggleLike = async (externalId) => {
 const toggleLike = async (externalId) => {
   if (!externalId) return alert("외부 ID가 없어 찜하기를 지원하지 않습니다.");
   try {
+      console.log("API_BASE:", process.env.REACT_APP_API_BASE);
+      
     const data = await api(`/api/likes/perform/${encodeURIComponent(externalId)}`, {
       method: "PUT",
       body: JSON.stringify({}),  // ← 일부 서버에서 필수
