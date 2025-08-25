@@ -44,6 +44,7 @@ const fetchSearchResults = async (q) => {
 const goDetail = (item) => {
   const id = item?.externalId || item?.id;
   if (!id) { alert('상세 정보를 찾을 수 없어요.'); return; }
+  console.log('[click]',id);
   navigate(`/information/${encodeURIComponent(id)}`);
 };
 
@@ -178,6 +179,8 @@ const ResultList = styled.ul`
   margin-top: 24px;
   padding: 0;
   list-style: none;
+  position: relative;
+  z-index: 1000;
 `;
 
 const ResultItem = styled.li`
