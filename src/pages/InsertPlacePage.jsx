@@ -191,7 +191,7 @@ function InsertPlacePage() {
         }
     }, [concertData, externalId]);
 
-    function handleSubmit() {
+    async function handleSubmit() {
         const selected1 = Profileitems.find((i) => i.id === activeId1);
         const selected2 = Vehicleitems.find((i) => i.id === activeId2);
         const profileMap = {
@@ -209,25 +209,21 @@ function InsertPlacePage() {
         const profileTypeValue = profileMap[selected1.text];
         const vehicleTypeValue = vehicleMap[selected2.text];
 
-        fetch("/api/place-recommendations/recommendations", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                venueName: concertData.venueName,
-                profileType: profileTypeValue,
-                transportationMethod: vehicleTypeValue,
-                customConditions: customConditions
-            }),
-        })
-            .then((res) => {
-                if (!res.ok) throw new Error("서버 에러");
-                return res.json();
-            })
-            .then((data) => {
-                // 다음 페이지로 이동, state로 응답 전달
-                navigate("/RecommendPage", { state: { recommendations: data } });
-            })
-            .catch((err) => console.error(err));
+        try {
+            const data = await api("/api/place-recommendations/recommendations", {
+                method: "POST",
+                body: JSON.stringify({
+                    venueName: concertData.venueName,
+                    profileType: profileTypeValue,
+                    transportationMethod: vehicleTypeValue,
+                    customConditions: customConditions,
+                }),
+            });
+
+            navigate("/RecommendPage", { state: { recommendations: data } });
+        } catch (err) {
+            console.error(err);
+        }
     }
 
     if (loading) return <Container>불러오는 중…</Container>;
